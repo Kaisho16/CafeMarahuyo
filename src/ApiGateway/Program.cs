@@ -8,9 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Dynamically patch YARP config with Render hostports if available
 string[] services = { "auth", "inventory", "transactions", "orders" };
 foreach (var s in services) {
-    var host = Environment.GetEnvironmentVariable($"{s.ToUpper()}_HOST");
-    if (!string.IsNullOrEmpty(host)) {
-        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"http://{host}";
+    var hostEnv = Environment.GetEnvironmentVariable($"{s.ToUpper()}_HOST");
+    if (!string.IsNullOrEmpty(hostEnv)) {
+        // Render Web Services ALWAYS listen on 10000 internally, even if PORT is different.
+        // hostEnv is "hostname:5101", so we extract the hostname and force port 10000.
+        var hostname = hostEnv.Split(':')[0];
+        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"http://{hostname}:10000";
     }
 }
 
