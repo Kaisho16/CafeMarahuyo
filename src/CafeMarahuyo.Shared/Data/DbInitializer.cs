@@ -8,7 +8,7 @@ namespace CafeMarahuyo.Shared.Data
     {
         public static void Initialize(CafeDbContext context)
         {
-            context.Database.EnsureCreated();
+            context.Database.Migrate();
 
             if (context.Users.Any())
             {

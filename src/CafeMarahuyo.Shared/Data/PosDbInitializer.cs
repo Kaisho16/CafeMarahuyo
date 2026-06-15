@@ -8,7 +8,7 @@ namespace CafeMarahuyo.Shared.Data
     {
         public static void Initialize(PosDbContext context)
         {
-            context.Database.EnsureCreated();
+            context.Database.Migrate();
 
             // POS Settings Seed
             if (!context.PosSettings.Any())
