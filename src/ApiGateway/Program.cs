@@ -10,8 +10,8 @@ string[] services = { "auth", "inventory", "transactions", "orders" };
 foreach (var s in services) {
     var hostEnv = Environment.GetEnvironmentVariable($"{s.ToUpper()}_HOST");
     if (!string.IsNullOrEmpty(hostEnv)) {
-        // Revert back to using the exact string Render provides (hostname:port)
-        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"http://{hostEnv}";
+        // We are now using property: host which gives us the public render.com hostname
+        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"https://{hostEnv}";
     }
 }
 
@@ -28,18 +28,10 @@ app.MapGet("/api/ping", async () => {
     client.Timeout = TimeSpan.FromSeconds(5);
     
     try {
-        var res = await client.GetAsync($"http://{authHost}/api/auth/me");
-        results.AppendLine($"Ping http://{authHost}: {res.StatusCode}");
+        var res = await client.GetAsync($"https://{authHost}/api/auth/me");
+        results.AppendLine($"Ping https://{authHost}: {res.StatusCode}");
     } catch (Exception ex) {
-        results.AppendLine($"Ping http://{authHost} FAILED: {ex.Message}");
-    }
-    
-    var hostOnly = authHost?.Split(':')[0];
-    try {
-        var res2 = await client.GetAsync($"http://{hostOnly}:10000/api/auth/me");
-        results.AppendLine($"Ping http://{hostOnly}:10000: {res2.StatusCode}");
-    } catch (Exception ex) {
-        results.AppendLine($"Ping http://{hostOnly}:10000 FAILED: {ex.Message}");
+        results.AppendLine($"Ping https://{authHost} FAILED: {ex.Message}");
     }
 
     return results.ToString();

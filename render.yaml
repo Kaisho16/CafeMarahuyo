@@ -60,19 +60,19 @@ services:
         fromService:
           type: web
           name: identity-service
-          property: hostport
+          property: host
       - key: INVENTORY_HOST
         fromService:
           type: web
           name: inventory-service
-          property: hostport
+          property: host
       - key: ORDERS_HOST
         fromService:
           type: web
           name: order-service
-          property: hostport
+          property: host
       - key: TRANSACTIONS_HOST
         fromService:
           type: web
           name: transaction-service
-          property: hostport
+          property: host
