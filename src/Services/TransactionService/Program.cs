@@ -23,7 +23,6 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CafeDbContext>();
-    context.Database.Migrate();
     // DbInitializer.Initialize is handled by InventoryService to prevent concurrent lock issues.
 }
 
