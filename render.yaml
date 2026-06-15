@@ -5,6 +5,9 @@ services:
     dockerfilePath: ./src/Services/IdentityService/Dockerfile
     dockerContext: .
     plan: free
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        value: "PASTE_YOUR_NEON_POSTGRES_CONNECTION_STRING_HERE"
 
   - type: web
     name: inventory-service
@@ -12,6 +15,9 @@ services:
     dockerfilePath: ./src/Services/InventoryService/Dockerfile
     dockerContext: .
     plan: free
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        value: "PASTE_YOUR_NEON_POSTGRES_CONNECTION_STRING_HERE"
 
   - type: web
     name: order-service
@@ -19,6 +25,9 @@ services:
     dockerfilePath: ./src/Services/OrderService/Dockerfile
     dockerContext: .
     plan: free
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        value: "PASTE_YOUR_NEON_POSTGRES_CONNECTION_STRING_HERE"
 
   - type: web
     name: transaction-service
@@ -26,6 +35,9 @@ services:
     dockerfilePath: ./src/Services/TransactionService/Dockerfile
     dockerContext: .
     plan: free
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        value: "PASTE_YOUR_NEON_POSTGRES_CONNECTION_STRING_HERE"
 
   - type: web
     name: api-gateway

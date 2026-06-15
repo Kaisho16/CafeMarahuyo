@@ -13,7 +13,7 @@ builder.Services.AddControllers();
 // Add DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CafeDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseNpgsql(connectionString));
 
 // Add shared JWT Auth
 builder.Services.AddSharedJwtAuthentication();

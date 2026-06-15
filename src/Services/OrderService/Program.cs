@@ -19,13 +19,11 @@ var connectionString = builder.Configuration.GetConnectionString("PosConnection"
     ?? "Data Source=../../../data/cafe_pos.db";
 
 builder.Services.AddDbContext<PosDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseNpgsql(connectionString));
 
-var cafeConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Data Source=../../../data/cafe_marahuyo.db";
-
+var cafeConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CafeDbContext>(options =>
-    options.UseSqlite(cafeConnectionString));
+    options.UseNpgsql(cafeConnectionString));
 
 // Add shared JWT Auth
 builder.Services.AddSharedJwtAuthentication();
