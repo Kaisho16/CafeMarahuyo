@@ -5,6 +5,15 @@ using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Dynamically patch YARP config with Render hostports if available
+string[] services = { "auth", "inventory", "transactions", "orders" };
+foreach (var s in services) {
+    var host = Environment.GetEnvironmentVariable($"{s.ToUpper()}_HOST");
+    if (!string.IsNullOrEmpty(host)) {
+        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"http://{host}";
+    }
+}
+
 // Add YARP
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));

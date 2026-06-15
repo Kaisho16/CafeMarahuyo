@@ -6,17 +6,14 @@ var connString = "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.t
 using var conn = new NpgsqlConnection(connString);
 conn.Open();
 
-// Drop all tables in public schema
-var dropCmd = new NpgsqlCommand(@"
-    DO $$ DECLARE
-        r RECORD;
-    BEGIN
-        FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = current_schema()) LOOP
-            EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
-        END LOOP;
-    END $$;
-", conn);
+var cmd = new NpgsqlCommand("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'", conn);
+using var reader = cmd.ExecuteReader();
 
-dropCmd.ExecuteNonQuery();
-
-Console.WriteLine("All tables dropped successfully.");
+Console.WriteLine("Tables in database:");
+int count = 0;
+while (reader.Read())
+{
+    Console.WriteLine("- " + reader.GetString(0));
+    count++;
+}
+if (count == 0) Console.WriteLine("NO TABLES FOUND! DATABASE IS EMPTY.");
