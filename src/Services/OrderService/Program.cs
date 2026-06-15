@@ -43,5 +43,5 @@ using (var scope = app.Services.CreateScope())
     PosDbInitializer.Initialize(posContext);
 }
 
-// Run on port 5105
-app.Run("http://0.0.0.0:5105");
+var portStr = Environment.GetEnvironmentVariable("PORT") ?? "5105";
+app.Run($"http://0.0.0.0:{portStr}");

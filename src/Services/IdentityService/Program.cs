@@ -35,5 +35,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Run on port 5101
-app.Run("http://0.0.0.0:5101");
+var portStr = Environment.GetEnvironmentVariable("PORT") ?? "5101";
+app.Run($"http://0.0.0.0:{portStr}");
