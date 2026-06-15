@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using CafeMarahuyo.Shared.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CafeMarahuyo.Shared.Data
 {
