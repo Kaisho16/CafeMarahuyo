@@ -7,7 +7,7 @@ services:
     plan: free
     envVars:
       - key: ConnectionStrings__DefaultConnection
-        value: "postgresql://neondb_owner:npg_7OByscUPiGM0@ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
 
   - type: web
     name: inventory-service
@@ -17,7 +17,7 @@ services:
     plan: free
     envVars:
       - key: ConnectionStrings__DefaultConnection
-        value: "postgresql://neondb_owner:npg_7OByscUPiGM0@ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
 
   - type: web
     name: order-service
@@ -27,7 +27,7 @@ services:
     plan: free
     envVars:
       - key: ConnectionStrings__DefaultConnection
-        value: "postgresql://neondb_owner:npg_7OByscUPiGM0@ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
 
   - type: web
     name: transaction-service
@@ -37,7 +37,7 @@ services:
     plan: free
     envVars:
       - key: ConnectionStrings__DefaultConnection
-        value: "postgresql://neondb_owner:npg_7OByscUPiGM0@ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
 
   - type: web
     name: api-gateway
