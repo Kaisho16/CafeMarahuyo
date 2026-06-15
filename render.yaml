@@ -47,3 +47,12 @@ services:
     dockerfilePath: ./src/ApiGateway/Dockerfile
     dockerContext: .
     plan: free
+    envVars:
+      - key: ReverseProxy__Clusters__auth-cluster__Destinations__destination1__Address
+        value: "http://identity-service:5101"
+      - key: ReverseProxy__Clusters__inventory-cluster__Destinations__destination1__Address
+        value: "http://inventory-service:5102"
+      - key: ReverseProxy__Clusters__orders-cluster__Destinations__destination1__Address
+        value: "http://order-service:5105"
+      - key: ReverseProxy__Clusters__transactions-cluster__Destinations__destination1__Address
+        value: "http://transaction-service:5103"
