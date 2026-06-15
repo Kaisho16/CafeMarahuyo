@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: identity-service
+    env: docker
+    dockerfilePath: ./src/Services/IdentityService/Dockerfile
+    dockerContext: .
+    plan: free
+
+  - type: web
+    name: inventory-service
+    env: docker
+    dockerfilePath: ./src/Services/InventoryService/Dockerfile
+    dockerContext: .
+    plan: free
+
+  - type: web
+    name: order-service
+    env: docker
+    dockerfilePath: ./src/Services/OrderService/Dockerfile
+    dockerContext: .
+    plan: free
+
+  - type: web
+    name: transaction-service
+    env: docker
+    dockerfilePath: ./src/Services/TransactionService/Dockerfile
+    dockerContext: .
+    plan: free
+
+  - type: web
+    name: api-gateway
+    env: docker
+    dockerfilePath: ./src/ApiGateway/Dockerfile
+    dockerContext: .
+    plan: free
