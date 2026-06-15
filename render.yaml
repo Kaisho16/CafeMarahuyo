@@ -28,6 +28,8 @@ services:
     envVars:
       - key: ConnectionStrings__DefaultConnection
         value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
+      - key: ConnectionStrings__PosConnection
+        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
 
   - type: web
     name: transaction-service

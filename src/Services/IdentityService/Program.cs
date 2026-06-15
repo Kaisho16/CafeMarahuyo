@@ -25,7 +25,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CafeDbContext>();
     // Enable WAL mode
-    context.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+    context.Database.EnsureCreated();
     // DbInitializer.Initialize is handled by InventoryService to prevent concurrent lock issues.
 }
 
