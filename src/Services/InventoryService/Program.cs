@@ -35,4 +35,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Run on port 5102
-app.Run("http://localhost:5102");
+app.Run("http://0.0.0.0:5102");

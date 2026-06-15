@@ -44,4 +44,4 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Run on port 5105
-app.Run("http://localhost:5105");
+app.Run("http://0.0.0.0:5105");
