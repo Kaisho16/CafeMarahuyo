@@ -10,10 +10,8 @@ string[] services = { "auth", "inventory", "transactions", "orders" };
 foreach (var s in services) {
     var hostEnv = Environment.GetEnvironmentVariable($"{s.ToUpper()}_HOST");
     if (!string.IsNullOrEmpty(hostEnv)) {
-        // Render Web Services ALWAYS listen on 10000 internally, even if PORT is different.
-        // hostEnv is "hostname:5101", so we extract the hostname and force port 10000.
-        var hostname = hostEnv.Split(':')[0];
-        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"http://{hostname}:10000";
+        // Revert back to using the exact string Render provides (hostname:port)
+        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"http://{hostEnv}";
     }
 }
 
@@ -22,6 +20,30 @@ builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
+
+app.MapGet("/api/ping", async () => {
+    var authHost = Environment.GetEnvironmentVariable("AUTH_HOST");
+    var results = new System.Text.StringBuilder();
+    using var client = new System.Net.Http.HttpClient();
+    client.Timeout = TimeSpan.FromSeconds(5);
+    
+    try {
+        var res = await client.GetAsync($"http://{authHost}/api/auth/me");
+        results.AppendLine($"Ping http://{authHost}: {res.StatusCode}");
+    } catch (Exception ex) {
+        results.AppendLine($"Ping http://{authHost} FAILED: {ex.Message}");
+    }
+    
+    var hostOnly = authHost?.Split(':')[0];
+    try {
+        var res2 = await client.GetAsync($"http://{hostOnly}:10000/api/auth/me");
+        results.AppendLine($"Ping http://{hostOnly}:10000: {res2.StatusCode}");
+    } catch (Exception ex) {
+        results.AppendLine($"Ping http://{hostOnly}:10000 FAILED: {ex.Message}");
+    }
+
+    return results.ToString();
+});
 
 // Serve static files from wwwroot
 app.UseStaticFiles();
