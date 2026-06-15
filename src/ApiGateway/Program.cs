@@ -10,8 +10,9 @@ string[] services = { "auth", "inventory", "transactions", "orders" };
 foreach (var s in services) {
     var hostEnv = Environment.GetEnvironmentVariable($"{s.ToUpper()}_HOST");
     if (!string.IsNullOrEmpty(hostEnv)) {
-        // We are now using property: host which gives us the public render.com hostname
-        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"https://{hostEnv}";
+        // Render's property: host returns just the subdomain prefix (e.g., identity-service-91wo)
+        // We append .onrender.com to forcefully route over the public internet
+        builder.Configuration[$"ReverseProxy:Clusters:{s}-cluster:Destinations:destination1:Address"] = $"https://{hostEnv}.onrender.com";
     }
 }
 
@@ -22,7 +23,7 @@ builder.Services.AddReverseProxy()
 var app = builder.Build();
 
 app.MapGet("/api/ping", async () => {
-    var authHost = Environment.GetEnvironmentVariable("AUTH_HOST");
+    var authHost = Environment.GetEnvironmentVariable("AUTH_HOST") + ".onrender.com";
     var results = new System.Text.StringBuilder();
     using var client = new System.Net.Http.HttpClient();
     client.Timeout = TimeSpan.FromSeconds(5);
