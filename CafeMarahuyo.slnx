@@ -1,13 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/ApiGateway/ApiGateway.csproj" />
+    <Project Path="src/CafeMarahuyo.Api/CafeMarahuyo.Api.csproj" />
     <Project Path="src/CafeMarahuyo.Shared/CafeMarahuyo.Shared.csproj" />
-  </Folder>
-  <Folder Name="/src/Services/">
-    <Project Path="src/Services/DashboardService/DashboardService.csproj" />
-    <Project Path="src/Services/IdentityService/IdentityService.csproj" />
-    <Project Path="src/Services/InventoryService/InventoryService.csproj" />
-    <Project Path="src/Services/OrderService/OrderService.csproj" />
-    <Project Path="src/Services/TransactionService/TransactionService.csproj" />
   </Folder>
 </Solution>

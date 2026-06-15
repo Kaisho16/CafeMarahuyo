@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cafe Marahuyo Inventory — Manage stock items, add, edit, and track inventory">
+    <title>Inventory — Cafe Marahuyo</title>
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css?v=2">
+</head>
+<body>
+    <div class="app-layout">
+        <button class="mobile-toggle" id="mobile-toggle">
+            <span class="material-icons-round">menu</span>
+        </button>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="/assets/logo.png" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-brand">
+                    <h2>Cafe Marahuyo</h2>
+                    <p>Inventory System</p>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="/inventory.html" class="nav-link active">
+                    <span class="material-icons-round nav-icon">inventory</span>
+                    Inventory
+                </a>
+                <a href="/transactions.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">receipt_long</span>
+                    Transactions
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-theme-toggle">
+                    <div class="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons-round toggle-icon" id="theme-icon">dark_mode</span>
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        <span class="toggle-label" id="theme-label">Dark</span>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-display-name">Admin</div>
+                        <div class="user-role" id="user-role">Inventory Manager</div>
+                    </div>
+                    <button class="btn-logout" id="btn-logout" title="Logout">
+                        <span class="material-icons-round">logout</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>Inventory</h1>
+                    <p>Manage stock items, categories, and quantities</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-secondary" id="btn-export-csv">
+                        <span class="material-icons-round">download</span> Export
+                    </button>
+                    <button class="btn btn-primary" id="btn-add-item" data-admin-only style="display:none;">
+                        <span class="material-icons-round">add</span> Add Item
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="table-container">
+                    <div class="table-toolbar">
+                        <div class="search-box">
+                            <span class="material-icons-round search-icon">search</span>
+                            <input type="text" id="search-input" placeholder="Search items...">
+                        </div>
+                        <select class="filter-select" id="filter-category">
+                            <option value="all">All Categories</option>
+                        </select>
+                        <select class="filter-select" id="filter-status">
+                            <option value="all">All Status</option>
+                            <option value="low">Low Stock</option>
+                            <option value="ok">In Stock</option>
+                        </select>
+                        <div class="date-filters">
+                            <input type="date" id="export-date-from" class="form-input" title="Export Date From">
+                            <span style="color:var(--text-muted); align-self:center;">-</span>
+                            <input type="date" id="export-date-to" class="form-input" title="Export Date To">
+                        </div>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th data-sort="name">Item ↕</th>
+                                    <th data-sort="category_name">Category ↕</th>
+                                    <th data-sort="quantity">Quantity ↕</th>
+                                    <th>Unit</th>
+                                    <th data-sort="cost_per_unit">Cost/Unit ↕</th>
+                                    <th data-sort="expiration_date">Expiration ↕</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-body">
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="page-loading">
+                                            <div class="spinner"></div>
+                                            Loading inventory...
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <span id="table-info">Loading...</span>
+                        <div class="pagination" id="pagination"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Item Modal -->
+    <div class="modal-overlay" id="item-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="item-modal-title">Add New Item</h3>
+                <button class="modal-close" id="item-modal-close">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="item-id">
+                <div class="form-group">
+                    <label for="item-name">Item Name *</label>
+                    <input type="text" id="item-name" class="form-input" placeholder="e.g., Arabica Coffee Beans" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="item-category">Category *</label>
+                        <select id="item-category" class="form-input"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="item-unit">Unit *</label>
+                        <select id="item-unit" class="form-input">
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="liters">liters</option>
+                            <option value="ml">ml</option>
+                            <option value="pcs">pcs</option>
+                            <option value="packs">packs</option>
+                            <option value="bottles">bottles</option>
+                            <option value="boxes">boxes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="item-quantity">Initial Quantity *</label>
+                        <input type="number" id="item-quantity" class="form-input" placeholder="0" min="0" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="item-cost">Cost Per Unit (₱) *</label>
+                        <input type="number" id="item-cost" class="form-input" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="item-min-stock">Min Stock Level</label>
+                        <input type="number" id="item-min-stock" class="form-input" placeholder="5" min="0" step="1" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="item-expiration">Expiration Date</label>
+                        <input type="date" id="item-expiration" class="form-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="item-description">Description</label>
+                    <textarea id="item-description" class="form-input" placeholder="Optional description..." rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="item-modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="item-modal-save">
+                    <span class="material-icons-round">save</span> Save Item
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock In Modal -->
+    <div class="modal-overlay" id="stock-in-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><span class="material-icons-round text-success" style="font-size:22px;vertical-align:middle;">add_circle</span> Add Stocks</h3>
+                <button class="modal-close" data-close="stock-in-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="stock-in-item-id">
+                <p>Adding stock to: <strong id="stock-in-item-name"></strong></p>
+                <p class="text-muted" style="font-size:0.85rem;">Current stock: <span id="stock-in-current"></span></p>
+                <div class="form-group">
+                    <label for="stock-in-qty">Quantity to Add *</label>
+                    <input type="number" id="stock-in-qty" class="form-input" placeholder="Enter whole number" min="1" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="stock-in-expiration">Expiration Date (of new batch)</label>
+                    <input type="date" id="stock-in-expiration" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="stock-in-notes">Notes</label>
+                    <textarea id="stock-in-notes" class="form-input" placeholder="Optional notes..." rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="stock-in-modal">Cancel</button>
+                <button class="btn btn-success" id="stock-in-save">
+                    <span class="material-icons-round">add_circle</span> Add Stocks
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Out Modal -->
+    <div class="modal-overlay" id="stock-out-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><span class="material-icons-round text-danger" style="font-size:22px;vertical-align:middle;">remove_circle</span> Remove Stocks</h3>
+                <button class="modal-close" data-close="stock-out-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="stock-out-item-id">
+                <p>Removing stock from: <strong id="stock-out-item-name"></strong></p>
+                <p class="text-muted" style="font-size:0.85rem;">Current stock: <span id="stock-out-current"></span></p>
+                <div class="form-group">
+                    <label for="stock-out-qty">Quantity to Remove *</label>
+                    <input type="number" id="stock-out-qty" class="form-input" placeholder="Enter whole number" min="1" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="stock-out-notes">Notes</label>
+                    <textarea id="stock-out-notes" class="form-input" placeholder="Optional notes..." rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="stock-out-modal">Cancel</button>
+                <button class="btn btn-danger" id="stock-out-save">
+                    <span class="material-icons-round">remove_circle</span> Remove Stocks
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><span class="material-icons-round text-danger" style="font-size:22px;vertical-align:middle;">delete</span> Delete Item</h3>
+                <button class="modal-close" data-close="delete-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="delete-item-name"></strong>?</p>
+                <p class="text-muted" style="font-size:0.85rem;">This action cannot be undone. All transaction history for this item will also be removed.</p>
+                <input type="hidden" id="delete-item-id">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="delete-modal">Cancel</button>
+                <button class="btn btn-danger" id="delete-confirm">
+                    <span class="material-icons-round">delete</span> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/js/utils.js?v=2"></script>
+    <script src="/js/inventory.js?v=2"></script>
+</body>
+</html>

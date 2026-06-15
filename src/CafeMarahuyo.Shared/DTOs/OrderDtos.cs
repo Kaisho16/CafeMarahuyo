@@ -47,6 +47,8 @@ namespace CafeMarahuyo.Shared.DTOs
         public string? DiscountType { get; set; }
         public decimal DiscountValue { get; set; }
         public string? PromoCode { get; set; }
+        public string? ReferenceCode { get; set; }
+        public bool UseXendit { get; set; } = false;
         public List<CreateOrderItemRequest> Items { get; set; } = new();
     }
 

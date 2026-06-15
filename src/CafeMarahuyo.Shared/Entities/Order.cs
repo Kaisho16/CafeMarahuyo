@@ -71,6 +71,10 @@ namespace CafeMarahuyo.Shared.Entities
         [MaxLength(100)]
         public string? PaymentReference { get; set; }
 
+        [Column("payment_url")]
+        [MaxLength(500)]
+        public string? PaymentUrl { get; set; }
+
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
     }
 }

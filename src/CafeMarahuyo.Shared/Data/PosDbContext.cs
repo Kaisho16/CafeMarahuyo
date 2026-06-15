@@ -12,7 +12,7 @@ namespace CafeMarahuyo.Shared.Data
         public DbSet<Promo> Promos { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
-        public DbSet<ProductAuditLog> ProductAuditLogs { get; set; } = null!;
+        public DbSet<ProductArchive> ProductArchives { get; set; } = null!;
         
         // New entities
         public DbSet<SizeModifier> SizeModifiers { get; set; } = null!;

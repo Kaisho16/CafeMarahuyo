@@ -1,0 +1,6 @@
+@CafeMarahuyo.Api_HostAddress = http://localhost:5100
+
+GET {{CafeMarahuyo.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

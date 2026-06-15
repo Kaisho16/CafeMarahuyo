@@ -1,32 +1,8 @@
 services:
   - type: web
-    name: identity-service
+    name: cafe-api
     env: docker
-    dockerfilePath: ./src/Services/IdentityService/Dockerfile
-    dockerContext: .
-    plan: free
-    envVars:
-      - key: ConnectionStrings__DefaultConnection
-        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
-      - key: PORT
-        value: "5101"
-
-  - type: web
-    name: inventory-service
-    env: docker
-    dockerfilePath: ./src/Services/InventoryService/Dockerfile
-    dockerContext: .
-    plan: free
-    envVars:
-      - key: ConnectionStrings__DefaultConnection
-        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
-      - key: PORT
-        value: "5102"
-
-  - type: web
-    name: order-service
-    env: docker
-    dockerfilePath: ./src/Services/OrderService/Dockerfile
+    dockerfilePath: ./src/CafeMarahuyo.Api/Dockerfile
     dockerContext: .
     plan: free
     envVars:
@@ -34,45 +10,3 @@ services:
         value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
       - key: ConnectionStrings__PosConnection
         value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
-      - key: PORT
-        value: "5105"
-
-  - type: web
-    name: transaction-service
-    env: docker
-    dockerfilePath: ./src/Services/TransactionService/Dockerfile
-    dockerContext: .
-    plan: free
-    envVars:
-      - key: ConnectionStrings__DefaultConnection
-        value: "Server=ep-wild-violet-ad4xn118-pooler.c-2.us-east-1.aws.neon.tech;Database=neondb;User Id=neondb_owner;Password=npg_7OByscUPiGM0;Ssl Mode=Require;"
-      - key: PORT
-        value: "5103"
-
-  - type: web
-    name: api-gateway
-    env: docker
-    dockerfilePath: ./src/ApiGateway/Dockerfile
-    dockerContext: .
-    plan: free
-    envVars:
-      - key: AUTH_HOST
-        fromService:
-          type: web
-          name: identity-service
-          property: host
-      - key: INVENTORY_HOST
-        fromService:
-          type: web
-          name: inventory-service
-          property: host
-      - key: ORDERS_HOST
-        fromService:
-          type: web
-          name: order-service
-          property: host
-      - key: TRANSACTIONS_HOST
-        fromService:
-          type: web
-          name: transaction-service
-          property: host
