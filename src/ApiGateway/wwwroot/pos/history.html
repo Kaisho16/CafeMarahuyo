@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - Cafe Marahuyo POS</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="pos.css?v=2">
+</head>
+<body>
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand" style="text-align: center; padding: 20px 0;">
+            <img src="/assets/logo.png" alt="Logo" style="width: 100px; height: auto; object-fit: contain; margin-bottom: 10px;">
+            <h2 style="color: var(--accent); font-weight: 800; font-size: 1.5rem; margin: 0;">MARAHUYO</h2>
+            <span style="font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 1px;">FLAVORS OF COMFORT</span>
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item">
+                <i class="material-icons-round">point_of_sale</i> Terminal
+            </a>
+            <div style="flex:1;"></div>
+            <a href="history.html" class="nav-item active">
+                <i class="material-icons-round">receipt_long</i> History
+            </a>
+            <a href="menu-management.html" class="nav-item" id="nav-menu-management" style="display: none;">
+                <i class="material-icons-round">restaurant_menu</i> Menu Management
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="header">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <h1>Order History</h1>
+            </div>
+            <div class="header-actions">
+                <span id="cashier-name" style="font-weight: 500; color: var(--text-secondary);">Loading...</span>
+                <span id="cashier-role" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;"></span>
+                <i class="material-icons-round" style="color: var(--text-muted); cursor: pointer;" onclick="logout()" title="Logout">logout</i>
+            </div>
+        </header>
+
+        <div class="history-container">
+            <!-- Revenue Card -->
+            <div class="revenue-card">
+                <div>
+                    <div class="revenue-title">Today's Revenue</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;"><span id="total-orders">0</span> Orders</div>
+                </div>
+                <div class="revenue-amount" id="total-revenue">₱0.00</div>
+            </div>
+
+            <!-- Filters -->
+            <div class="history-filters">
+                <input type="text" id="search-input" placeholder="Search Order # or Cashier..." style="width: 250px;">
+                <input type="date" id="date-from">
+                <input type="date" id="date-to">
+                <select id="payment-mode-filter">
+                    <option value="">All Payment Modes</option>
+                    <option value="Cash">Cash</option>
+                    <option value="E-Wallet">E-Wallet</option>
+                </select>
+                <select id="order-type-filter">
+                    <option value="">All Order Types</option>
+                    <option value="Dine-in">Dine-in</option>
+                    <option value="Takeout">Takeout</option>
+                </select>
+                <button class="promo-btn" style="background: var(--accent); color: white;" onclick="fetchHistory()">Filter</button>
+            </div>
+
+            <!-- Table -->
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Date & Time</th>
+                        <th>Type</th>
+                        <th>Items</th>
+                        <th>Cashier</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                    </tr>
+                </thead>
+                <tbody id="history-tbody">
+                    <!-- JS inject -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- DIGITAL RECEIPT MODAL (Reused from pos.css) -->
+    <div class="modal-overlay" id="receipt-modal-overlay"></div>
+    <div class="receipt-modal" id="receipt-modal">
+        <div class="receipt-paper" id="receipt-content">
+            <!-- Receipt content rendered via JS -->
+        </div>
+        <div style="padding: 20px; display: flex; gap: 10px; background: var(--bg-main); border-radius: 0 0 var(--radius-md) var(--radius-md);">
+            <button class="checkout-btn" style="background: var(--text-primary);" onclick="closeReceiptModal()">Close</button>
+            <button class="checkout-btn" style="background: var(--accent); flex: 0 0 60px; padding: 0;" onclick="printReceipt()">
+                <i class="material-icons-round">print</i>
+            </button>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="history.js?v=2"></script>
+</body>
+</html>

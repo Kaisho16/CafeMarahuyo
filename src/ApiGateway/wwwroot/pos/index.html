@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Marahuyo POS</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="pos.css?v=2">
+</head>
+<body>
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand" style="text-align: center; padding: 20px 0;">
+            <img src="/assets/logo.png" alt="Logo" style="width: 100px; height: auto; object-fit: contain; margin-bottom: 10px;">
+            <h2 style="color: var(--accent); font-weight: 800; font-size: 1.5rem; margin: 0;">MARAHUYO</h2>
+            <span style="font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 1px;">FLAVORS OF COMFORT</span>
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item active">
+                <i class="material-icons-round">point_of_sale</i> Terminal
+            </a>
+            <div style="flex:1;"></div>
+            <a href="history.html" class="nav-item">
+                <i class="material-icons-round">receipt_long</i> History
+            </a>
+            <a href="menu-management.html" class="nav-item" id="nav-menu-management" style="display: none;">
+                <i class="material-icons-round">restaurant_menu</i> Menu Management
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="header">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <h1>POS Terminal</h1>
+                <div class="category-filters" id="category-filters">
+                    <!-- Category chips will be rendered here -->
+                </div>
+            </div>
+            <div class="header-actions">
+                <span id="cashier-name" style="font-weight: 500; color: var(--text-secondary);">Loading...</span>
+                <span id="cashier-role" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;"></span>
+                <i class="material-icons-round" style="color: var(--text-muted); cursor: pointer;" onclick="logout()" title="Logout">logout</i>
+            </div>
+        </header>
+
+        <!-- Product Grid -->
+        <div class="product-grid-container">
+            <div class="product-grid" id="product-grid">
+                <!-- Products rendered via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- CART PANEL -->
+    <aside class="cart-panel">
+        <div class="cart-header">
+            <div>
+                <h2>Current Order</h2>
+                <span class="order-num" id="current-order-num">#---</span>
+            </div>
+            <div class="order-type-selector">
+                <button class="order-type-btn active" onclick="setOrderType('Dine-in')">Dine-in</button>
+                <button class="order-type-btn" onclick="setOrderType('Takeout')">Takeout</button>
+            </div>
+        </div>
+        
+        <div class="cart-items" id="cart-items">
+            <!-- Empty state -->
+            <div class="empty-state">
+                <i class="material-icons-round" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">shopping_cart</i>
+                <p>No items in cart</p>
+                <p style="font-size: 0.85rem; margin-top: 4px;">Select items from the menu to add them</p>
+            </div>
+        </div>
+        
+        <div class="cart-footer">
+            <div class="payment-modes">
+                <button class="payment-btn active" onclick="setPaymentMode('Cash')">
+                    <i class="material-icons-round" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">payments</i> Cash
+                </button>
+                <button class="payment-btn" onclick="setPaymentMode('E-Wallet')">
+                    <i class="material-icons-round" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">qr_code_scanner</i> E-Wallet
+                </button>
+            </div>
+
+            <div class="discount-section">
+                <select id="discount-type" class="promo-input" style="width: auto; margin-right: 8px;" onchange="toggleDiscountInput()">
+                    <option value="">No Discount</option>
+                    <option value="percentage">% Discount</option>
+                    <option value="fixed">₱ Discount</option>
+                    <option value="promo">Promo Code</option>
+                </select>
+                <input type="text" id="discount-value" class="promo-input" style="display: none;" placeholder="Value">
+                <button class="promo-btn" id="apply-discount-btn" onclick="applyDiscount()">Apply</button>
+            </div>
+
+            <!-- Cash Tendering Section (Only visible when Cash is selected) -->
+            <div class="cash-tendering-section" id="cash-tendering-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Amount Tendered (₱)</span>
+                    <input type="number" id="amount-tendered" class="promo-input" style="width: 120px; text-align: right; font-weight: 600;" placeholder="0.00" oninput="calculateChange()">
+                </div>
+                <div class="quick-cash-btns">
+                    <button onclick="addQuickCash(50)">+50</button>
+                    <button onclick="addQuickCash(100)">+100</button>
+                    <button onclick="addQuickCash(500)">+500</button>
+                    <button onclick="addQuickCash(1000)">+1000</button>
+                </div>
+            </div>
+
+            <div class="totals">
+                <div class="totals-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">₱0.00</span>
+                </div>
+                <div class="totals-row" id="discount-row" style="display: none; color: var(--danger);">
+                    <span>Discount</span>
+                    <span id="discount-amount">-₱0.00</span>
+                </div>
+                <div class="totals-row">
+                    <span>Tax (<span id="tax-rate-label">0</span>%)</span>
+                    <span id="tax-amount">₱0.00</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span>Total</span>
+                    <span id="grand-total">₱0.00</span>
+                </div>
+                <div class="totals-row" id="change-row" style="font-weight: 700; color: var(--success); margin-top: 10px; font-size: 1.1rem;">
+                    <span>Change</span>
+                    <span id="change-amount">₱0.00</span>
+                </div>
+            </div>
+            
+            <button class="checkout-btn" id="checkout-btn" onclick="checkout()">
+                Checkout & Print
+            </button>
+        </div>
+    </aside>
+
+    <!-- CUSTOMIZATION MODAL (Slide Up) -->
+    <div class="modal-overlay" id="customization-modal-overlay"></div>
+    <div class="customization-modal" id="customization-modal">
+        <div class="custom-modal-header">
+            <h2 id="custom-modal-title">Product Name</h2>
+            <button class="close-btn" onclick="closeCustomizationModal()">
+                <i class="material-icons-round">close</i>
+            </button>
+        </div>
+        <div class="custom-modal-body">
+            
+            <!-- Size -->
+            <div class="custom-section">
+                <h3>Size</h3>
+                <div class="pill-group" id="size-options">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Temperature -->
+            <div class="custom-section">
+                <h3>Temperature</h3>
+                <div class="pill-group" id="temp-options">
+                    <div class="pill active" onclick="selectTemp(this, 'Iced')">Iced</div>
+                    <div class="pill" onclick="selectTemp(this, 'Hot')">Hot</div>
+                </div>
+            </div>
+
+            <!-- Ice & Sugar -->
+            <div class="ice-sugar-wrapper">
+                <div class="custom-section" id="ice-section">
+                    <h3>Ice Level</h3>
+                    <div class="pill-group" id="ice-options" style="flex-wrap: wrap;">
+                        <div class="pill" onclick="selectIce(this, 'No Ice')">No Ice</div>
+                        <div class="pill" onclick="selectIce(this, 'Less Ice')">Less Ice</div>
+                        <div class="pill active" onclick="selectIce(this, 'Regular Ice')">Regular</div>
+                        <div class="pill" onclick="selectIce(this, 'Extra Ice')">Extra Ice</div>
+                    </div>
+                </div>
+                <div class="custom-section">
+                    <h3>Sugar Level</h3>
+                    <div class="pill-group" id="sugar-options" style="flex-wrap: wrap;">
+                        <div class="pill" onclick="selectSugar(this, 'No Sugar')">0%</div>
+                        <div class="pill" onclick="selectSugar(this, 'Less Sugar')">50%</div>
+                        <div class="pill active" onclick="selectSugar(this, 'Regular')">100%</div>
+                        <div class="pill" onclick="selectSugar(this, 'Extra Sugar')">150%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add-ons (Milk, Shots, Syrups) -->
+            <div id="addons-container" style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Rendered by JS -->
+            </div>
+
+        </div>
+        <div class="custom-modal-footer">
+            <div class="custom-total">
+                <span style="font-size: 0.9rem; color: var(--text-secondary);">Item Total</span>
+                <div id="custom-item-total" style="font-size: 1.4rem; font-weight: 800; color: var(--accent);">₱0.00</div>
+            </div>
+            <button class="add-to-order-btn" onclick="addCustomizedItemToCart()">Add to Order</button>
+        </div>
+    </div>
+
+    <!-- DIGITAL RECEIPT MODAL -->
+    <div class="modal-overlay" id="receipt-modal-overlay"></div>
+    <div class="receipt-modal" id="receipt-modal">
+        <div class="receipt-paper" id="receipt-content">
+            <!-- Receipt content rendered via JS -->
+        </div>
+        <div style="padding: 20px; display: flex; gap: 10px; background: var(--bg-main); border-radius: 0 0 var(--radius-md) var(--radius-md);">
+            <button class="checkout-btn" style="background: var(--text-primary);" onclick="closeReceiptModal()">New Order</button>
+            <button class="checkout-btn" style="background: var(--accent); flex: 0 0 60px; padding: 0;" onclick="printReceipt()">
+                <i class="material-icons-round">print</i>
+            </button>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+    <script src="pos.js?v=2"></script>
+</body>
+</html>

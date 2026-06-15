@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  identity-service:
+    build: 
+      context: ./src
+      dockerfile: Services/IdentityService/Dockerfile
+    ports:
+      - "5102:80"
+    volumes:
+      - ./data:/data
+
+  inventory-service:
+    build: 
+      context: ./src
+      dockerfile: Services/InventoryService/Dockerfile
+    ports:
+      - "5103:80"
+    volumes:
+      - ./data:/data
+
+  order-service:
+    build: 
+      context: ./src
+      dockerfile: Services/OrderService/Dockerfile
+    ports:
+      - "5105:80"
+    volumes:
+      - ./data:/data
+
+  transaction-service:
+    build: 
+      context: ./src
+      dockerfile: Services/TransactionService/Dockerfile
+    ports:
+      - "5104:80"
+    volumes:
+      - ./data:/data
+
+  api-gateway:
+    build: 
+      context: ./src
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - "5100:80"
+    depends_on:
+      - identity-service
+      - inventory-service
+      - order-service
+      - transaction-service

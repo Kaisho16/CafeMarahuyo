@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cafe Marahuyo Inventory Management System — Login">
+    <title>Cafe Marahuyo — Login</title>
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-theme-toggle">
+                    <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons-round toggle-icon" id="theme-icon">dark_mode</span>
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                        <span class="toggle-label" id="theme-label">Dark</span>
+                    </div>
+                </div>
+
+                <img src="/assets/logo.png" alt="Cafe Marahuyo" class="login-logo" id="login-logo">
+                <h1 class="login-brand">Cafe Marahuyo</h1>
+                <p class="login-tagline">Flavors of Comfort</p>
+
+                <!-- Login Mode Tabs -->
+                <div class="login-tabs" style="display: flex; border-bottom: 1px solid var(--border); margin-bottom: 25px;">
+                    <button id="tab-inventory" class="login-tab active" onclick="setLoginMode('inventory')" style="flex: 1; background: none; border: none; padding: 15px; font-weight: 600; color: var(--accent); border-bottom: 2px solid var(--accent); cursor: pointer;">Inventory System</button>
+                    <button id="tab-pos" class="login-tab" onclick="setLoginMode('pos')" style="flex: 1; background: none; border: none; padding: 15px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid transparent; cursor: pointer;">POS Terminal</button>
+                </div>
+
+                <form class="login-form" id="login-form">
+                    <div class="login-error" id="login-error"></div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" class="form-input" placeholder="Enter username" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter password" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-full" id="btn-login">
+                        <span class="material-icons-round">login</span>
+                        Sign In
+                    </button>
+                </form>
+                
+                <p class="text-muted mt-16" style="font-size: 0.8rem;" id="login-footer">Inventory Management System v2.0</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inline script to handle tab switching before external auth.js loads
+        let loginMode = localStorage.getItem('cm_login_mode') || 'inventory';
+        window.currentLoginMode = loginMode;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setLoginMode(loginMode);
+        });
+
+        function setLoginMode(mode) {
+            loginMode = mode;
+            const tabInv = document.getElementById('tab-inventory');
+            const tabPos = document.getElementById('tab-pos');
+            
+            if (mode === 'inventory') {
+                tabInv.style.color = 'var(--accent)';
+                tabInv.style.borderBottomColor = 'var(--accent)';
+                tabPos.style.color = 'var(--text-secondary)';
+                tabPos.style.borderBottomColor = 'transparent';
+            } else {
+                tabPos.style.color = 'var(--accent)';
+                tabPos.style.borderBottomColor = 'var(--accent)';
+                tabInv.style.color = 'var(--text-secondary)';
+                tabInv.style.borderBottomColor = 'transparent';
+            }
+            
+            // Expose globally for auth.js
+            window.currentLoginMode = mode;
+        }
+    </script>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/auth.js"></script>
+</body>
+</html>

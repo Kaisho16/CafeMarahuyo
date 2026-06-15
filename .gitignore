@@ -1,0 +1,18 @@
+# Build folders
+bin/
+obj/
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+/data/
+
+# IDE files
+.vscode/
+.vs/
+*.user
+*.suo
+
+# macOS
+.DS_Store

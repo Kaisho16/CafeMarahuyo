@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cafe Marahuyo Dashboard — Inventory overview and analytics">
+    <title>Dashboard — Cafe Marahuyo</title>
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Mobile Toggle -->
+        <button class="mobile-toggle" id="mobile-toggle">
+            <span class="material-icons-round">menu</span>
+        </button>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="/assets/logo.png" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-brand">
+                    <h2>Cafe Marahuyo</h2>
+                    <p>Inventory System</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/dashboard.html" class="nav-link active">
+                    <span class="material-icons-round nav-icon">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="/inventory.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">inventory</span>
+                    Inventory
+                </a>
+                <a href="/transactions.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">receipt_long</span>
+                    Transactions
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-theme-toggle">
+                    <div class="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons-round toggle-icon" id="theme-icon">dark_mode</span>
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        <span class="toggle-label" id="theme-label">Dark</span>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-display-name">Admin</div>
+                        <div class="user-role" id="user-role">Inventory Manager</div>
+                    </div>
+                    <button class="btn-logout" id="btn-logout" title="Logout">
+                        <span class="material-icons-round">logout</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>Dashboard</h1>
+                    <p>Welcome back! Here's your inventory overview.</p>
+                </div>
+                <div class="page-header-actions">
+                    <span class="text-muted" id="current-date" style="font-size: 0.85rem;"></span>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <!-- Summary Stats -->
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card" id="stat-total">
+                        <div class="stat-header">
+                            <div class="stat-icon"><span class="material-icons-round">inventory_2</span></div>
+                            <span class="stat-label">Total Items</span>
+                        </div>
+                        <div class="stat-value" id="total-items">—</div>
+                        <div class="stat-sub">Items in inventory</div>
+                    </div>
+                    <div class="stat-card" id="stat-low">
+                        <div class="stat-header">
+                            <div class="stat-icon"><span class="material-icons-round">warning</span></div>
+                            <span class="stat-label">Low Stock</span>
+                        </div>
+                        <div class="stat-value" id="low-stock-count">—</div>
+                        <div class="stat-sub">Items need restocking</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><span class="material-icons-round">payments</span></div>
+                            <span class="stat-label">Total Value</span>
+                        </div>
+                        <div class="stat-value" id="total-value">—</div>
+                        <div class="stat-sub">Inventory value (₱)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><span class="material-icons-round">trending_up</span></div>
+                            <span class="stat-label">Today's Activity</span>
+                        </div>
+                        <div class="stat-value" id="today-activity">—</div>
+                        <div class="stat-sub" id="today-detail">In: 0 · Out: 0</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <h3>7-Day Stock Activity</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="usage-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <h3>Category Distribution</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="category-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Alerts -->
+                <div class="alert-section" id="low-stock-section" style="display: none;">
+                    <div class="alert-section-header">
+                        <span class="material-icons-round text-danger" style="font-size: 24px;">error</span>
+                        <h3>Low Stock Alerts</h3>
+                        <span class="alert-badge" id="alert-count">0</span>
+                    </div>
+                    <div class="low-stock-grid" id="low-stock-grid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>
