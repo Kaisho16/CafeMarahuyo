@@ -34,7 +34,7 @@
                 <a href="/transactions.html" class="nav-link">
                     <span class="material-icons-round nav-icon">receipt_long</span> Transactions
                 </a>
-                <a href="/recipes.html" class="nav-link">
+                <a href="/recipes.html" class="nav-link" id="nav-recipes" style="display:none;" data-admin-only>
                     <span class="material-icons-round nav-icon">restaurant_menu</span> Recipes
                 </a>
                 <a href="/users.html" class="nav-link active" id="nav-users" style="display:none;" data-admin-only>
@@ -80,11 +80,12 @@
                                     <th>Username</th>
                                     <th>Display Name</th>
                                     <th>Role</th>
+                                    <th style="width: 80px; text-align: right;">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="users-body">
                                 <tr>
-                                    <td colspan="4">
+                                    <td colspan="5">
                                         <div class="page-loading">
                                             <div class="spinner"></div>
                                             Loading users...
@@ -234,7 +235,7 @@
                         <td><strong>${escapeHtml(u.username)}</strong></td>
                         <td>${escapeHtml(u.displayName)}</td>
                         <td><span class="badge badge-category">${escapeHtml(u.role)}</span></td>
-                        <td>
+                        <td style="text-align: right;">
                             ${(u.id === currentUser.id || u.id === 1) ? '' : `
                             <button class="btn btn-sm" style="color: var(--danger); background: rgba(239, 68, 68, 0.1);" onclick="deleteUser(${u.id})">
                                 <span class="material-icons-round" style="font-size: 16px;">delete</span>
