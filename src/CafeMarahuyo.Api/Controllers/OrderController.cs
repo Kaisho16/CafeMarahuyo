@@ -577,27 +577,6 @@ namespace CafeMarahuyo.Api.Controllers
             return Ok(new { message = "Ingredient removed from recipe" });
         }
 
-        [HttpPost("products/upload-image")]
-        [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UploadProductImage(Microsoft.AspNetCore.Http.IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded.");
-
-            var uploadsFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            if (!System.IO.Directory.Exists(uploadsFolder))
-                System.IO.Directory.CreateDirectory(uploadsFolder);
-
-            var fileName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(file.FileName);
-            var filePath = System.IO.Path.Combine(uploadsFolder, fileName);
-
-            using (var stream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            return Ok(new { imageUrl = "/uploads/" + fileName });
-        }
 
         [HttpPost("products")]
         [Authorize(Roles = "admin")]

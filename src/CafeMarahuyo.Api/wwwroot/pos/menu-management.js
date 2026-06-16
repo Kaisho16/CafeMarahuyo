@@ -111,12 +111,7 @@ function openProductModal(id = null) {
             <label>Price (₱)</label>
             <input type="number" id="m-prod-price" class="form-input" value="${p ? p.price : 0}">
         </div>
-        <div class="form-group">
-            <label>Product Image</label>
-            <input type="file" id="m-prod-img-file" class="form-input" accept="image/*">
-            <input type="hidden" id="m-prod-img-url" value="${p ? (p.imageUrl||'') : '/pos/assets/default-coffee.png'}">
-            ${p && p.imageUrl ? `<small style="color:var(--text-muted);margin-top:4px;">Current image: <a href="${p.imageUrl}" target="_blank" style="color:var(--accent);text-decoration:none;">View Image</a></small>` : ''}
-        </div>
+
         <div class="form-group">
             <label>Description</label>
             <textarea id="m-prod-desc" class="form-input" rows="2">${p ? (p.description||'') : ''}</textarea>
@@ -135,9 +130,6 @@ function openProductModal(id = null) {
 }
 
 async function saveProduct(id) {
-    let imageUrl = document.getElementById('m-prod-img-url').value;
-    const fileInput = document.getElementById('m-prod-img-file');
-    
     // Disable save button to prevent double click
     const saveBtn = document.getElementById('admin-save-btn');
     if (saveBtn && saveBtn.disabled) return;
@@ -147,33 +139,11 @@ async function saveProduct(id) {
     }
 
     try {
-        if (fileInput.files && fileInput.files[0]) {
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            
-            const token = localStorage.getItem('cm_token');
-            const uploadRes = await fetch('/api/orders/products/upload-image', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
-            
-            if (uploadRes.ok) {
-                const uploadData = await uploadRes.json();
-                imageUrl = uploadData.imageUrl;
-            } else {
-                showToast("Failed to upload image", true);
-                saveBtn.disabled = false;
-                saveBtn.textContent = "Save";
-                return;
-            }
-        }
-
         const req = {
             name: document.getElementById('m-prod-name').value,
             categoryName: document.getElementById('m-prod-cat').value,
             price: parseFloat(document.getElementById('m-prod-price').value) || 0,
-            imageUrl: imageUrl,
+            imageUrl: null,
             description: document.getElementById('m-prod-desc').value
         };
     
