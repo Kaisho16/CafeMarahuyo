@@ -82,7 +82,6 @@ function renderProducts() {
     
     tbody.innerHTML = filtered.map(p => `
         <tr style="${!p.isAvailable ? 'opacity: 0.6;' : ''}">
-            <td><img src="${p.imageUrl || '/pos/assets/default-coffee.png'}" onerror="this.onerror=null; this.src='/pos/assets/default-coffee.png';" style="width:40px;height:40px;object-fit:contain;"></td>
             <td style="font-weight:600;">${p.name}</td>
             <td>${p.categoryName}</td>
             <td>₱${p.price.toFixed(2)}</td>
