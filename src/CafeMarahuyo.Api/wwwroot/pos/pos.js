@@ -522,6 +522,9 @@ async function checkout() {
         btn.textContent = "Processing...";
     }
 
+    const isEWallet = currentPaymentMode === 'E-Wallet';
+    const isManualReference = document.getElementById('reference-code') && document.getElementById('reference-code').value.trim() !== '';
+
     const req = {
         orderType: currentOrderType,
         paymentMode: currentPaymentMode,
@@ -529,7 +532,8 @@ async function checkout() {
         discountType: currentDiscountType,
         discountValue: currentDiscountValue,
         promoCode: currentPromoCode,
-        referenceCode: document.getElementById('reference-code') ? document.getElementById('reference-code').value : null,
+        referenceCode: isManualReference ? document.getElementById('reference-code').value : null,
+        useXendit: isEWallet && !isManualReference, // Only use Xendit if E-Wallet is selected AND no manual reference code is provided
         items: cart.map(i => ({
             productId: i.product.id,
             quantity: i.quantity,
@@ -554,7 +558,13 @@ async function checkout() {
         }
         
         const data = await res.json();
-        showToast("Order Success!");
+        
+        if (data.paymentUrl) {
+            showToast("Opening Xendit Payment Portal...", false);
+            window.open(data.paymentUrl, '_blank');
+        } else {
+            showToast("Order Success!");
+        }
         
         // Fetch and show receipt
         fetchAndShowReceipt(data.orderId);

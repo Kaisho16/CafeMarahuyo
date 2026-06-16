@@ -105,8 +105,8 @@ namespace CafeMarahuyo.Api.Controllers
             });
         }
 
-        [HttpGet("export/csv")]
-        public async Task<IActionResult> ExportCsv(
+        [HttpGet("export/excel")]
+        public async Task<IActionResult> ExportExcel(
             [FromQuery] string? category, 
             [FromQuery] string? type, 
             [FromQuery] string? date_from, 
@@ -146,24 +146,60 @@ namespace CafeMarahuyo.Api.Controllers
                 filename += $"_{timestamp}";
             }
             
-            filename += ".csv";
+            filename += ".xlsx";
 
             var transactions = await query
                 .OrderByDescending(t => t.CreatedAt)
                 .ThenByDescending(t => t.Id)
                 .ToListAsync();
 
-            var sb = new StringBuilder();
-            sb.AppendLine("ID,Date,Item,Category,Type,Quantity,Unit,Previous Qty,New Qty,Notes,Performed By");
-
-            foreach (var t in transactions)
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+            var ws = workbook.Worksheets.Add("Transactions");
+            
+            var headers = new[] { "ID", "Date", "Item", "Category", "Type", "Quantity", "Unit", "Previous Qty", "New Qty", "Notes", "Performed By" };
+            for (int i = 0; i < headers.Length; i++)
             {
-                var typeLabel = t.Type == "stock_in" ? "Stock In" : "Stock Out";
-                sb.AppendLine($"{t.Id},{t.CreatedAt.AddHours(8):yyyy-MM-ddTHH:mm:ss},\"{t.Item?.Name}\",\"{t.Item?.Category?.Name}\",{typeLabel},{t.Quantity},{t.Item?.Unit},{t.PreviousQuantity},{t.NewQuantity},\"{t.Notes?.Replace("\"", "\"\"")}\",\"{t.User?.DisplayName}\"");
+                ws.Cell(1, i + 1).Value = headers[i];
+                ws.Cell(1, i + 1).Style.Font.Bold = true;
+                ws.Cell(1, i + 1).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
             }
 
+            int row = 2;
+            foreach (var t in transactions)
+            {
+                ws.Cell(row, 1).Value = t.Id;
+                ws.Cell(row, 2).Value = t.CreatedAt.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss");
+                ws.Cell(row, 3).Value = t.Item?.Name;
+                ws.Cell(row, 4).Value = t.Item?.Category?.Name;
+                ws.Cell(row, 5).Value = t.Type;
+                
+                if (t.Type == "stock_in")
+                {
+                    ws.Cell(row, 5).Style.Font.FontColor = ClosedXML.Excel.XLColor.Green;
+                }
+                else if (t.Type == "stock_out")
+                {
+                    ws.Cell(row, 5).Style.Font.FontColor = ClosedXML.Excel.XLColor.Red;
+                }
+
+                ws.Cell(row, 6).Value = t.Quantity;
+                ws.Cell(row, 7).Value = t.Item?.Unit;
+                ws.Cell(row, 8).Value = t.PreviousQuantity;
+                ws.Cell(row, 9).Value = t.NewQuantity;
+                ws.Cell(row, 10).Value = t.Notes;
+                ws.Cell(row, 11).Value = t.User?.DisplayName;
+
+                row++;
+            }
+
+            ws.Columns().AdjustToContents();
+
+            using var stream = new System.IO.MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
             Response.Headers.Add("Content-Disposition", $"attachment; filename={filename}");
-            return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv");
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
     }
 }

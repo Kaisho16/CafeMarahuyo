@@ -116,7 +116,7 @@ async function exportHistory() {
         if (pMode) params.append('paymentMode', pMode);
         if (oType) params.append('orderType', oType);
 
-        const res = await fetchWithAuth(`/api/orders/export/csv?${params.toString()}`);
+        const res = await fetchWithAuth(`/api/orders/export/excel?${params.toString()}`);
         if (!res.ok) throw new Error("Failed to export history");
 
         const blob = await res.blob();
@@ -124,7 +124,7 @@ async function exportHistory() {
         const a = document.createElement('a');
         a.href = downloadUrl;
         
-        let filename = 'pos_history_export.csv';
+        let filename = 'pos_history_export.xlsx';
         const disposition = res.headers.get('Content-Disposition');
         if (disposition && disposition.indexOf('attachment') !== -1) {
             const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;

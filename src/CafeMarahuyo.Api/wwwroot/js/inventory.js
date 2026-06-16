@@ -272,7 +272,7 @@ function bindEvents() {
         try {
             const dateFrom = document.getElementById('export-date-from')?.value;
             const dateTo = document.getElementById('export-date-to')?.value;
-            let url = '/inventory/export/csv';
+            let url = '/inventory/export/excel';
             const params = new URLSearchParams();
             if (dateFrom) params.set('date_from', dateFrom);
             if (dateTo) params.set('date_to', dateTo);

@@ -31,8 +31,8 @@ namespace CafeMarahuyo.Api.Controllers
             return Ok(categories);
         }
 
-        [HttpGet("export/csv")]
-        public async Task<IActionResult> ExportCsv(
+        [HttpGet("export/excel")]
+        public async Task<IActionResult> ExportExcel(
             [FromQuery] string? date_from, 
             [FromQuery] string? date_to)
         {
@@ -64,26 +64,62 @@ namespace CafeMarahuyo.Api.Controllers
                 filename += $"_{timestamp}";
             }
             
-            filename += ".csv";
+            filename += ".xlsx";
 
             var items = await query
                 .OrderBy(i => i.Category!.Name).ThenBy(i => i.Name)
                 .ToListAsync();
 
-            var sb = new StringBuilder();
-            sb.AppendLine("ID,Name,Category,Quantity,Unit,Cost Per Unit,Min Stock Level,Status,Earliest Expiration Date,Description,Last Updated");
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+            var ws = workbook.Worksheets.Add("Inventory");
+            
+            // Headers
+            var headers = new[] { "ID", "Name", "Category", "Quantity", "Unit", "Cost Per Unit", "Min Stock Level", "Status", "Earliest Expiration Date", "Description", "Last Updated" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+                ws.Cell(1, i + 1).Style.Font.Bold = true;
+                ws.Cell(1, i + 1).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+            }
 
+            // Data
+            int row = 2;
             foreach (var item in items)
             {
                 var status = item.Quantity < item.MinStockLevel ? "Low Stock" : "In Stock";
                 var earliestExp = item.Batches.Where(b => b.ExpirationDate.HasValue).OrderBy(b => b.ExpirationDate).FirstOrDefault()?.ExpirationDate;
                 var exp = earliestExp?.ToString("yyyy-MM-dd") ?? "N/A";
                 
-                sb.AppendLine($"{item.Id},\"{item.Name}\",\"{item.Category?.Name}\",{item.Quantity},{item.Unit},{item.CostPerUnit},{item.MinStockLevel},{status},{exp},\"{item.Description?.Replace("\"", "\"\"")}\",{item.UpdatedAt.AddHours(8):yyyy-MM-ddTHH:mm:ss}");
+                ws.Cell(row, 1).Value = item.Id;
+                ws.Cell(row, 2).Value = item.Name;
+                ws.Cell(row, 3).Value = item.Category?.Name;
+                ws.Cell(row, 4).Value = item.Quantity;
+                ws.Cell(row, 5).Value = item.Unit;
+                ws.Cell(row, 6).Value = item.CostPerUnit;
+                ws.Cell(row, 6).Style.NumberFormat.Format = "₱ #,##0.00";
+                ws.Cell(row, 7).Value = item.MinStockLevel;
+                ws.Cell(row, 8).Value = status;
+                
+                if (status == "Low Stock")
+                {
+                    ws.Cell(row, 8).Style.Font.FontColor = ClosedXML.Excel.XLColor.Red;
+                }
+                
+                ws.Cell(row, 9).Value = exp;
+                ws.Cell(row, 10).Value = item.Description;
+                ws.Cell(row, 11).Value = item.UpdatedAt.AddHours(8).ToString("yyyy-MM-dd HH:mm:ss");
+                
+                row++;
             }
 
+            ws.Columns().AdjustToContents();
+
+            using var stream = new System.IO.MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
             Response.Headers.Add("Content-Disposition", $"attachment; filename={filename}");
-            return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv");
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
 
         [HttpGet]

@@ -183,7 +183,7 @@ function bindEvents() {
         if (type !== 'all') params.set('type', type);
 
         try {
-            let url = `/transactions/export/csv`;
+            let url = `/transactions/export/excel`;
             if (params.toString()) url += `?${params.toString()}`;
             
             const token = localStorage.getItem('cm_token');

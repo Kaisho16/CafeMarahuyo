@@ -92,12 +92,12 @@ async function apiFetch(endpoint, options = {}) {
             return null;
         }
 
-        if (response.headers.get('Content-Type')?.includes('text/csv')) {
+        if (response.headers.get('Content-Type')?.includes('spreadsheetml')) {
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            let filename = 'export.csv';
+            let filename = 'export.xlsx';
             const disposition = response.headers.get('Content-Disposition');
             if (disposition) {
                 const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);

@@ -372,8 +372,8 @@ namespace CafeMarahuyo.Api.Controllers
             return Ok(dtos);
         }
 
-        [HttpGet("export/csv")]
-        public async Task<IActionResult> ExportCsv([FromQuery] string? search, [FromQuery] string? dateFrom, [FromQuery] string? dateTo, [FromQuery] string? paymentMode, [FromQuery] string? orderType)
+        [HttpGet("export/excel")]
+        public async Task<IActionResult> ExportExcel([FromQuery] string? search, [FromQuery] string? dateFrom, [FromQuery] string? dateTo, [FromQuery] string? paymentMode, [FromQuery] string? orderType)
         {
             var query = _context.Orders
                 .Include(o => o.Items)
@@ -407,7 +407,7 @@ namespace CafeMarahuyo.Api.Controllers
                 filename += $"_{timestamp}";
             }
             
-            filename += ".csv";
+            filename += ".xlsx";
 
             if (!string.IsNullOrEmpty(paymentMode))
             {
@@ -420,17 +420,42 @@ namespace CafeMarahuyo.Api.Controllers
 
             var orders = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
 
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine("Order #,Date & Time,Type,Payment Mode,Total Amount,Cashier,Items");
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+            var ws = workbook.Worksheets.Add("POS History");
+            
+            var headers = new[] { "Order #", "Date & Time", "Type", "Payment Mode", "Total Amount", "Cashier", "Items" };
+            for (int i = 0; i < headers.Length; i++)
+            {
+                ws.Cell(1, i + 1).Value = headers[i];
+                ws.Cell(1, i + 1).Style.Font.Bold = true;
+                ws.Cell(1, i + 1).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+            }
 
+            int row = 2;
             foreach (var o in orders)
             {
                 var itemsStr = string.Join(" | ", o.Items.Select(i => $"{i.Quantity}x {i.Product?.Name}"));
-                sb.AppendLine($"\"{o.OrderNumber}\",{o.OrderDate.ToLocalTime():yyyy-MM-dd HH:mm:ss},{o.OrderType},{o.PaymentMode},{o.TotalAmount},\"{o.CashierName}\",\"{itemsStr}\"");
+                
+                ws.Cell(row, 1).Value = o.OrderNumber;
+                ws.Cell(row, 2).Value = o.OrderDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+                ws.Cell(row, 3).Value = o.OrderType;
+                ws.Cell(row, 4).Value = o.PaymentMode;
+                ws.Cell(row, 5).Value = o.TotalAmount;
+                ws.Cell(row, 5).Style.NumberFormat.Format = "₱ #,##0.00";
+                ws.Cell(row, 6).Value = o.CashierName;
+                ws.Cell(row, 7).Value = itemsStr;
+
+                row++;
             }
 
+            ws.Columns().AdjustToContents();
+
+            using var stream = new System.IO.MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
             Response.Headers.Add("Content-Disposition", $"attachment; filename={filename}");
-            return File(System.Text.Encoding.UTF8.GetBytes(sb.ToString()), "text/csv");
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
 
         [HttpGet("history/summary")]
