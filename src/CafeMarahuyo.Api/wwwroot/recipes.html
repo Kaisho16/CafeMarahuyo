@@ -261,6 +261,9 @@
         }
 
         document.getElementById('btn-save-ingredient').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-save-ingredient');
+            if (btn.disabled) return;
+
             if (!selectedProduct) return;
             
             const itemId = document.getElementById('ingredient-select').value;
@@ -271,7 +274,6 @@
                 return;
             }
 
-            const btn = document.getElementById('btn-save-ingredient');
             btn.disabled = true;
 
             try {

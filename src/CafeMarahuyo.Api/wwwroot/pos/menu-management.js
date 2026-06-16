@@ -141,8 +141,11 @@ async function saveProduct(id) {
     
     // Disable save button to prevent double click
     const saveBtn = document.getElementById('admin-save-btn');
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Saving...";
+    if (saveBtn && saveBtn.disabled) return;
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+    }
 
     try {
         if (fileInput.files && fileInput.files[0]) {
@@ -230,9 +233,16 @@ function openSizeModal(id) {
         </div>
     `;
     document.getElementById('admin-save-btn').onclick = async () => {
-        const p = parseFloat(document.getElementById('m-size-price').value) || 0;
-        const res = await fetchWithAuth(`/api/orders/size-modifiers/${id}`, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({priceModifier: p})});
-        if(res.ok) { showToast("Saved"); closeAdminModal(); fetchSizes(); }
+        const btn = document.getElementById('admin-save-btn');
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try {
+            const p = parseFloat(document.getElementById('m-size-price').value) || 0;
+            const res = await fetchWithAuth(`/api/orders/size-modifiers/${id}`, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({priceModifier: p})});
+            if(res.ok) { showToast("Saved"); closeAdminModal(); fetchSizes(); }
+        } finally {
+            btn.disabled = false;
+        }
     };
     document.getElementById('admin-modal-overlay').classList.add('open');
     document.getElementById('admin-modal').classList.add('open');
@@ -286,15 +296,22 @@ function openAddonModal(id = null) {
         </div>
     `;
     document.getElementById('admin-save-btn').onclick = async () => {
-        const req = {
-            category: document.getElementById('m-addon-cat').value,
-            name: document.getElementById('m-addon-name').value,
-            price: parseFloat(document.getElementById('m-addon-price').value) || 0
-        };
-        const method = id ? 'PUT' : 'POST';
-        const url = id ? `/api/orders/addons/${id}` : `/api/orders/addons`;
-        const res = await fetchWithAuth(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
-        if(res.ok) { showToast("Saved"); closeAdminModal(); fetchAddons(); }
+        const btn = document.getElementById('admin-save-btn');
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try {
+            const req = {
+                category: document.getElementById('m-addon-cat').value,
+                name: document.getElementById('m-addon-name').value,
+                price: parseFloat(document.getElementById('m-addon-price').value) || 0
+            };
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/orders/addons/${id}` : `/api/orders/addons`;
+            const res = await fetchWithAuth(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
+            if(res.ok) { showToast("Saved"); closeAdminModal(); fetchAddons(); }
+        } finally {
+            btn.disabled = false;
+        }
     };
     document.getElementById('admin-modal-overlay').classList.add('open');
     document.getElementById('admin-modal').classList.add('open');
@@ -321,12 +338,19 @@ async function fetchSettings() {
 }
 
 async function saveSettings() {
-    const req = {
-        taxRate: parseFloat(document.getElementById('set-tax').value) || 0,
-        receiptFooter: document.getElementById('set-footer').value
-    };
-    const res = await fetchWithAuth('/api/orders/settings', { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(req) });
-    if (res.ok) showToast("Settings saved!");
+    const btn = document.querySelector('button[onclick="saveSettings()"]');
+    if (btn && btn.disabled) return;
+    if (btn) btn.disabled = true;
+    try {
+        const req = {
+            taxRate: parseFloat(document.getElementById('set-tax').value) || 0,
+            receiptFooter: document.getElementById('set-footer').value
+        };
+        const res = await fetchWithAuth('/api/orders/settings', { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(req) });
+        if (res.ok) showToast("Settings saved!");
+    } finally {
+        if (btn) btn.disabled = false;
+    }
 }
 
 // ========================== AUDIT LOGS ==========================

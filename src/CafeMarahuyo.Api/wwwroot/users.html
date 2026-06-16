@@ -180,6 +180,9 @@
             });
 
             document.getElementById('btn-save-user').addEventListener('click', async () => {
+                const btn = document.getElementById('btn-save-user');
+                if (btn.disabled) return;
+
                 const password = document.getElementById('new-password').value;
                 const confirmPassword = document.getElementById('new-confirm-password').value;
                 
@@ -188,7 +191,6 @@
                     return;
                 }
 
-                const btn = document.getElementById('btn-save-user');
                 btn.disabled = true;
 
                 const payload = {
@@ -217,6 +219,7 @@
 
         async function loadUsers() {
             try {
+                const currentUser = getUser();
                 const users = await apiFetch('/auth/users');
                 const tbody = document.getElementById('users-body');
                 

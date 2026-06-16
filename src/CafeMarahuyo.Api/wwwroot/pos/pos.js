@@ -367,37 +367,45 @@ function toggleDiscountInput() {
 }
 
 async function applyDiscount() {
-    const type = document.getElementById('discount-type').value;
-    const valStr = document.getElementById('discount-value').value;
-    
-    if (type === '') return;
-    
-    if (type === 'promo') {
-        try {
-            const res = await fetchWithAuth('/api/orders/validate-promo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ promoCode: valStr })
-            });
-            if (!res.ok) throw new Error("Invalid promo code");
-            
-            const promo = await res.json();
-            currentPromoCode = promo.code;
-            currentDiscountType = promo.discountType;
-            currentDiscountValue = promo.value;
-            showToast("Promo applied!");
-        } catch (e) {
-            showToast("Invalid promo code", true);
+    const btn = document.querySelector('button[onclick="applyDiscount()"]');
+    if (btn && btn.disabled) return;
+    if (btn) btn.disabled = true;
+
+    try {
+        const type = document.getElementById('discount-type').value;
+        const valStr = document.getElementById('discount-value').value;
+        
+        if (type === '') return;
+        
+        if (type === 'promo') {
+            try {
+                const res = await fetchWithAuth('/api/orders/validate-promo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ promoCode: valStr })
+                });
+                if (!res.ok) throw new Error("Invalid promo code");
+                
+                const promo = await res.json();
+                currentPromoCode = promo.code;
+                currentDiscountType = promo.discountType;
+                currentDiscountValue = promo.value;
+                showToast("Promo applied!");
+            } catch (e) {
+                showToast("Invalid promo code", true);
+                currentPromoCode = null;
+                currentDiscountType = '';
+                currentDiscountValue = 0;
+            }
+        } else {
+            currentDiscountType = type;
+            currentDiscountValue = parseFloat(valStr) || 0;
             currentPromoCode = null;
-            currentDiscountType = '';
-            currentDiscountValue = 0;
         }
-    } else {
-        currentDiscountType = type;
-        currentDiscountValue = parseFloat(valStr) || 0;
-        currentPromoCode = null;
+        updateCart();
+    } finally {
+        if (btn) btn.disabled = false;
     }
-    updateCart();
 }
 
 function addQuickCash(amt) {
@@ -508,8 +516,11 @@ function updateCart() {
 
 async function checkout() {
     const btn = document.getElementById('checkout-btn');
-    btn.disabled = true;
-    btn.textContent = "Processing...";
+    if (btn && btn.disabled) return;
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+    }
 
     const req = {
         orderType: currentOrderType,
