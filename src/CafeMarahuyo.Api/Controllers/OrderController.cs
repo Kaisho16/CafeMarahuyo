@@ -441,8 +441,78 @@ namespace CafeMarahuyo.Api.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAllProductsAdmin()
         {
-            var products = await _context.Products.OrderBy(p => p.CategoryName).ThenBy(p => p.Name).ToListAsync();
-            return Ok(products.Select(p => new ProductDto { Id = p.Id, Name = p.Name, CategoryName = p.CategoryName, Price = p.Price, Description = p.Description, IsAvailable = p.IsAvailable }));
+            var products = await _context.Products
+                .Include(p => p.Ingredients)
+                .OrderBy(p => p.CategoryName).ThenBy(p => p.Name).ToListAsync();
+                
+            var result = new List<ProductDto>();
+            foreach(var p in products)
+            {
+                var dto = new ProductDto { Id = p.Id, Name = p.Name, CategoryName = p.CategoryName, Price = p.Price, Description = p.Description, IsAvailable = p.IsAvailable };
+                if (p.Ingredients != null && p.Ingredients.Any())
+                {
+                    // Fetch inventory names
+                    var invIds = p.Ingredients.Select(i => i.InventoryItemId).ToList();
+                    var invItems = await _cafeContext.InventoryItems.Where(i => invIds.Contains(i.Id)).ToDictionaryAsync(i => i.Id, i => i);
+                    
+                    foreach(var ing in p.Ingredients)
+                    {
+                        if(invItems.TryGetValue(ing.InventoryItemId, out var invItem))
+                        {
+                            dto.Ingredients.Add(new ProductIngredientDto
+                            {
+                                Id = ing.Id,
+                                ProductId = ing.ProductId,
+                                InventoryItemId = ing.InventoryItemId,
+                                InventoryItemName = invItem.Name,
+                                Unit = invItem.Unit,
+                                QuantityRequired = ing.QuantityRequired
+                            });
+                        }
+                    }
+                }
+                result.Add(dto);
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("products/{productId}/ingredients")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> AddProductIngredient(int productId, [FromBody] CreateProductIngredientRequest req)
+        {
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null) return NotFound("Product not found");
+
+            var invItem = await _cafeContext.InventoryItems.FindAsync(req.InventoryItemId);
+            if (invItem == null) return NotFound("Inventory item not found");
+
+            var existing = await _context.ProductIngredients.FirstOrDefaultAsync(i => i.ProductId == productId && i.InventoryItemId == req.InventoryItemId);
+            if (existing != null) return BadRequest("Ingredient already added to this product");
+
+            var ingredient = new ProductIngredient
+            {
+                ProductId = productId,
+                InventoryItemId = req.InventoryItemId,
+                QuantityRequired = req.QuantityRequired
+            };
+
+            _context.ProductIngredients.Add(ingredient);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Ingredient added to recipe" });
+        }
+
+        [HttpDelete("products/{productId}/ingredients/{ingredientId}")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> RemoveProductIngredient(int productId, int ingredientId)
+        {
+            var ingredient = await _context.ProductIngredients.FirstOrDefaultAsync(i => i.Id == ingredientId && i.ProductId == productId);
+            if (ingredient == null) return NotFound();
+
+            _context.ProductIngredients.Remove(ingredient);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Ingredient removed from recipe" });
         }
 
         [HttpPost("products")]

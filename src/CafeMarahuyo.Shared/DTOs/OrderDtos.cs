@@ -12,6 +12,23 @@ namespace CafeMarahuyo.Shared.DTOs
         public string? ImageUrl { get; set; }
         public string? Description { get; set; }
         public bool IsAvailable { get; set; }
+        public List<ProductIngredientDto> Ingredients { get; set; } = new();
+    }
+
+    public class ProductIngredientDto
+    {
+        public int Id { get; set; }
+        public int ProductId { get; set; }
+        public int InventoryItemId { get; set; }
+        public string InventoryItemName { get; set; } = string.Empty;
+        public string Unit { get; set; } = string.Empty;
+        public int QuantityRequired { get; set; }
+    }
+
+    public class CreateProductIngredientRequest
+    {
+        public int InventoryItemId { get; set; }
+        public int QuantityRequired { get; set; }
     }
 
     public class SizeModifierDto

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cafe Marahuyo Inventory Management System — Register">
+    <title>Cafe Marahuyo — Register</title>
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-theme-toggle">
+                    <div class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons-round toggle-icon" id="theme-icon">dark_mode</span>
+                        <div class="toggle-track">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                        <span class="toggle-label" id="theme-label">Dark</span>
+                    </div>
+                </div>
+
+                <img src="/assets/logo.png" alt="Cafe Marahuyo" class="login-logo" id="login-logo">
+                <h1 class="login-brand">Create Account</h1>
+                <p class="login-tagline">Join the Cafe Marahuyo System</p>
+
+                <form class="login-form" id="register-form">
+                    <div class="login-error" id="register-error" style="display:none; color: var(--danger); margin-bottom: 15px; font-size: 0.9rem;"></div>
+                    
+                    <div class="form-group">
+                        <label for="reg-username">Username *</label>
+                        <input type="text" id="reg-username" class="form-input" placeholder="Choose a username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-displayname">Display Name *</label>
+                        <input type="text" id="reg-displayname" class="form-input" placeholder="e.g., John Doe" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-password">Password *</label>
+                        <input type="password" id="reg-password" class="form-input" placeholder="Create a password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-role">Role *</label>
+                        <select id="reg-role" class="form-input" onchange="toggleSecretKey()">
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                            <option value="Inventory Manager">Inventory Manager</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="secret-key-group" style="display: none;">
+                        <label for="reg-secretkey">Secret Key (Required for Admin)</label>
+                        <input type="password" id="reg-secretkey" class="form-input" placeholder="Enter Admin Secret Key">
+                        <small class="text-muted" style="display:block; margin-top:5px; font-size: 0.8rem;">Required if registering an admin, or if no users are logged in.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-full" id="btn-register" style="margin-top: 10px;">
+                        <span class="material-icons-round">person_add</span>
+                        Register
+                    </button>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="/index.html" style="color: var(--accent); text-decoration: none; font-size: 0.9rem;">Already have an account? Log in</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSecretKey() {
+            const role = document.getElementById('reg-role').value;
+            const token = localStorage.getItem('cm_token');
+            const secretGroup = document.getElementById('secret-key-group');
+            
+            // Show secret key if role is admin OR if the user is not logged in
+            if (role === 'admin' || !token) {
+                secretGroup.style.display = 'block';
+            } else {
+                secretGroup.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleSecretKey();
+            
+            document.getElementById('register-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btn-register');
+                const errDiv = document.getElementById('register-error');
+                
+                const username = document.getElementById('reg-username').value.trim();
+                const displayName = document.getElementById('reg-displayname').value.trim();
+                const password = document.getElementById('reg-password').value;
+                const role = document.getElementById('reg-role').value;
+                const secretKey = document.getElementById('reg-secretkey').value;
+                
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-icons-round rotate">refresh</span> Registering...';
+                errDiv.style.display = 'none';
+                
+                try {
+                    const token = localStorage.getItem('cm_token');
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (token) {
+                        headers['Authorization'] = `Bearer ${token}`;
+                    }
+
+                    const res = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ 
+                            username: username, 
+                            password: password, 
+                            displayName: displayName, 
+                            role: role, 
+                            secretKey: secretKey 
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (!res.ok) {
+                        throw new Error(data.error || 'Failed to register');
+                    }
+                    
+                    // Success
+                    alert('User registered successfully! You can now log in.');
+                    window.location.href = '/index.html';
+                    
+                } catch (err) {
+                    errDiv.textContent = err.message;
+                    errDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-icons-round">person_add</span> Register';
+                }
+            });
+        });
+    </script>
+    <script src="/js/utils.js"></script>
+</body>
+</html>

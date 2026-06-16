@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cafe Marahuyo — User Management">
+    <title>User Management — Cafe Marahuyo</title>
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <button class="mobile-toggle" id="mobile-toggle">
+            <span class="material-icons-round">menu</span>
+        </button>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="/assets/logo.png" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-brand">
+                    <h2>Cafe Marahuyo</h2>
+                    <p>Inventory System</p>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">dashboard</span> Dashboard
+                </a>
+                <a href="/inventory.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">inventory</span> Inventory
+                </a>
+                <a href="/transactions.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">receipt_long</span> Transactions
+                </a>
+                <a href="/recipes.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">restaurant_menu</span> Recipes
+                </a>
+                <a href="/users.html" class="nav-link active" id="nav-users" style="display:none;">
+                    <span class="material-icons-round nav-icon">people</span> Users
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-theme-toggle">
+                    <div class="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons-round toggle-icon" id="theme-icon">dark_mode</span>
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        <span class="toggle-label" id="theme-label">Dark</span>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-display-name">Admin</div>
+                        <div class="user-role" id="user-role">Inventory Manager</div>
+                    </div>
+                    <button class="btn-logout" id="btn-logout" title="Logout">
+                        <span class="material-icons-round">logout</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>User Management</h1>
+                    <p>Manage staff accounts and permissions</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-primary" id="btn-add-user">
+                        <span class="material-icons-round">person_add</span> Create User
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Display Name</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-body">
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="page-loading">
+                                            <div class="spinner"></div>
+                                            Loading users...
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal-overlay" id="user-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create New User</h3>
+                <button class="modal-close" data-close="user-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-username">Username *</label>
+                    <input type="text" id="new-username" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-displayname">Display Name *</label>
+                    <input type="text" id="new-displayname" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Password *</label>
+                    <input type="password" id="new-password" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-role">Role *</label>
+                    <select id="new-role" class="form-input">
+                        <option value="staff">Staff</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group" id="admin-secret-group" style="display:none;">
+                    <label for="new-secretkey">Admin Secret Key</label>
+                    <input type="password" id="new-secretkey" class="form-input" placeholder="Required for Admins">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="user-modal">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-user">
+                    <span class="material-icons-round">save</span> Create User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!requireAuthentication()) return;
+            
+            const user = getUser();
+            if (!user || user.role !== 'admin') {
+                document.body.innerHTML = '<h1>Unauthorized</h1><p>You must be an admin to view this page.</p><a href="/dashboard.html">Return to Dashboard</a>';
+                return;
+            }
+
+            document.getElementById('nav-users').style.display = 'flex';
+            
+            loadUsers();
+
+            document.getElementById('btn-add-user').addEventListener('click', () => {
+                document.getElementById('new-username').value = '';
+                document.getElementById('new-displayname').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('new-role').value = 'staff';
+                document.getElementById('new-secretkey').value = '';
+                document.getElementById('admin-secret-group').style.display = 'none';
+                openModal('user-modal');
+            });
+
+            document.getElementById('new-role').addEventListener('change', (e) => {
+                document.getElementById('admin-secret-group').style.display = e.target.value === 'admin' ? 'block' : 'none';
+            });
+
+            document.getElementById('btn-save-user').addEventListener('click', async () => {
+                const btn = document.getElementById('btn-save-user');
+                btn.disabled = true;
+
+                const payload = {
+                    username: document.getElementById('new-username').value.trim(),
+                    displayName: document.getElementById('new-displayname').value.trim(),
+                    password: document.getElementById('new-password').value,
+                    role: document.getElementById('new-role').value,
+                    secretKey: document.getElementById('new-secretkey').value
+                };
+
+                try {
+                    await apiFetch('/auth/register', {
+                        method: 'POST',
+                        body: payload
+                    });
+                    showToast('User created successfully');
+                    closeModal('user-modal');
+                    loadUsers();
+                } catch (err) {
+                    showToast(err.message || 'Failed to create user', 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
+
+        async function loadUsers() {
+            try {
+                const users = await apiFetch('/auth/users');
+                const tbody = document.getElementById('users-body');
+                
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">No users found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td><strong>${escapeHtml(u.username)}</strong></td>
+                        <td>${escapeHtml(u.displayName)}</td>
+                        <td><span class="badge badge-category">${escapeHtml(u.role)}</span></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                showToast('Failed to load users', 'error');
+            }
+        }
+        
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

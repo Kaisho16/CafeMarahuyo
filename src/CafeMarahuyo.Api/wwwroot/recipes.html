@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cafe Marahuyo — Recipes & Ingredients Management">
+    <title>Recipes — Cafe Marahuyo</title>
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Mobile Toggle -->
+        <button class="mobile-toggle" id="mobile-toggle">
+            <span class="material-icons-round">menu</span>
+        </button>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="/assets/logo.png" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-brand">
+                    <h2>Cafe Marahuyo</h2>
+                    <p>Inventory System</p>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">dashboard</span> Dashboard
+                </a>
+                <a href="/inventory.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">inventory</span> Inventory
+                </a>
+                <a href="/transactions.html" class="nav-link">
+                    <span class="material-icons-round nav-icon">receipt_long</span> Transactions
+                </a>
+                <a href="/recipes.html" class="nav-link active">
+                    <span class="material-icons-round nav-icon">restaurant_menu</span> Recipes
+                </a>
+                <a href="/users.html" class="nav-link" id="nav-users" style="display:none;">
+                    <span class="material-icons-round nav-icon">people</span> Users
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-theme-toggle">
+                    <div class="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons-round toggle-icon" id="theme-icon">dark_mode</span>
+                        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                        <span class="toggle-label" id="theme-label">Dark</span>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">A</div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-display-name">Admin</div>
+                        <div class="user-role" id="user-role">Inventory Manager</div>
+                    </div>
+                    <button class="btn-logout" id="btn-logout" title="Logout">
+                        <span class="material-icons-round">logout</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h1>Recipe Management</h1>
+                    <p>Map POS products to inventory ingredients for automated stock deduction</p>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    
+                    <!-- Products List -->
+                    <div style="flex: 1; min-width: 300px; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border);">
+                        <h3>Products</h3>
+                        <div style="margin-top: 15px; max-height: 600px; overflow-y: auto;">
+                            <ul id="products-list" style="list-style: none; padding: 0; margin: 0;">
+                                <li>Loading...</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Recipe Details -->
+                    <div style="flex: 2; min-width: 400px; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 id="recipe-title">Select a product...</h3>
+                            <button class="btn btn-primary btn-sm" id="btn-add-ingredient" style="display: none;" onclick="openAddIngredientModal()">
+                                <span class="material-icons-round">add</span> Add Ingredient
+                            </button>
+                        </div>
+                        
+                        <div id="recipe-content" style="margin-top: 20px;">
+                            <p class="text-muted">Click on a product from the list to view or edit its recipe.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Ingredient Modal -->
+    <div class="modal-overlay" id="add-ingredient-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Ingredient to <span id="modal-product-name">Product</span></h3>
+                <button class="modal-close" data-close="add-ingredient-modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="ingredient-select">Select Inventory Item *</label>
+                    <select id="ingredient-select" class="form-input" required>
+                        <option value="">Loading items...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ingredient-qty">Quantity Required *</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="ingredient-qty" class="form-input" min="1" step="1" required style="flex: 1;">
+                        <span id="ingredient-unit" style="color: var(--text-secondary); width: 50px;">-</span>
+                    </div>
+                    <small class="text-muted" style="display:block; margin-top:5px; font-size: 0.8rem;">Amount to deduct per order</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close="add-ingredient-modal">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-ingredient">
+                    <span class="material-icons-round">save</span> Add
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/js/utils.js"></script>
+    <script>
+        let allProducts = [];
+        let allInventoryItems = [];
+        let selectedProduct = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!requireAuthentication()) return;
+            
+            const user = getUser();
+            if (user && user.role === 'admin') {
+                document.getElementById('nav-users').style.display = 'flex';
+            }
+
+            // Must be admin to edit recipes? Wait, actually OrderController "products/all" has [Authorize(Roles = "admin")]
+            if (user.role !== 'admin') {
+                document.body.innerHTML = '<h1>Unauthorized</h1><p>You must be an admin to manage recipes.</p><a href="/dashboard.html">Return to Dashboard</a>';
+                return;
+            }
+
+            await Promise.all([loadProducts(), loadInventoryItems()]);
+            renderProductsList();
+        });
+
+        async function loadProducts() {
+            try {
+                allProducts = await apiFetch('/orders/products/all');
+            } catch (err) {
+                showToast('Failed to load products', 'error');
+            }
+        }
+
+        async function loadInventoryItems() {
+            try {
+                const data = await apiFetch('/inventory');
+                allInventoryItems = data.items || [];
+                
+                const select = document.getElementById('ingredient-select');
+                select.innerHTML = '<option value="">-- Select an item --</option>' + 
+                    allInventoryItems.map(i => `<option value="${i.id}" data-unit="${i.unit}">${escapeHtml(i.name)} (${escapeHtml(i.unit)})</option>`).join('');
+                
+                select.addEventListener('change', (e) => {
+                    const opt = e.target.options[e.target.selectedIndex];
+                    document.getElementById('ingredient-unit').textContent = opt ? opt.dataset.unit : '-';
+                });
+            } catch (err) {
+                showToast('Failed to load inventory items', 'error');
+            }
+        }
+
+        function renderProductsList() {
+            const ul = document.getElementById('products-list');
+            ul.innerHTML = allProducts.map(p => `
+                <li style="padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center;" 
+                    onclick="selectProduct(${p.id})" id="prod-li-${p.id}" class="prod-item">
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary);">${escapeHtml(p.name)}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${escapeHtml(p.categoryName)}</div>
+                    </div>
+                    <span class="badge badge-category">${p.ingredients ? p.ingredients.length : 0} items</span>
+                </li>
+            `).join('');
+        }
+
+        function selectProduct(id) {
+            document.querySelectorAll('.prod-item').forEach(el => el.style.background = 'transparent');
+            document.getElementById(`prod-li-${id}`).style.background = 'var(--bg-color)';
+            
+            selectedProduct = allProducts.find(p => p.id === id);
+            
+            document.getElementById('recipe-title').textContent = selectedProduct.name + ' Recipe';
+            document.getElementById('btn-add-ingredient').style.display = 'flex';
+            document.getElementById('modal-product-name').textContent = selectedProduct.name;
+            
+            renderRecipe();
+        }
+
+        function renderRecipe() {
+            const content = document.getElementById('recipe-content');
+            if (!selectedProduct.ingredients || selectedProduct.ingredients.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <span class="material-icons-round" style="font-size: 48px; color: var(--text-muted); opacity: 0.5;">restaurant</span>
+                        <p style="margin-top: 10px; color: var(--text-secondary);">No ingredients mapped yet.<br>This product will not deduct any stock automatically.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ingredient (Inventory Item)</th>
+                            <th>Quantity to Deduct</th>
+                            <th style="width: 80px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            selectedProduct.ingredients.forEach(ing => {
+                html += `
+                    <tr>
+                        <td><strong>${escapeHtml(ing.inventoryItemName)}</strong></td>
+                        <td>${ing.quantityRequired} ${escapeHtml(ing.unit)}</td>
+                        <td style="text-align: right;">
+                            <button class="btn btn-sm" style="color: var(--danger); background: rgba(239, 68, 68, 0.1);" onclick="removeIngredient(${ing.id})">
+                                <span class="material-icons-round" style="font-size: 16px;">delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            content.innerHTML = html;
+        }
+
+        function openAddIngredientModal() {
+            document.getElementById('ingredient-select').value = '';
+            document.getElementById('ingredient-qty').value = '';
+            document.getElementById('ingredient-unit').textContent = '-';
+            openModal('add-ingredient-modal');
+        }
+
+        document.getElementById('btn-save-ingredient').addEventListener('click', async () => {
+            if (!selectedProduct) return;
+            
+            const itemId = document.getElementById('ingredient-select').value;
+            const qty = document.getElementById('ingredient-qty').value;
+            
+            if (!itemId || !qty || qty <= 0) {
+                showToast('Please provide valid item and quantity', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-ingredient');
+            btn.disabled = true;
+
+            try {
+                await apiFetch(`/orders/products/${selectedProduct.id}/ingredients`, {
+                    method: 'POST',
+                    body: {
+                        inventoryItemId: parseInt(itemId),
+                        quantityRequired: parseInt(qty)
+                    }
+                });
+                showToast('Ingredient added');
+                closeModal('add-ingredient-modal');
+                await loadProducts(); // Reload all to get updated recipes
+                selectProduct(selectedProduct.id); // Re-select to refresh view
+                renderProductsList(); // Update the counts on left side
+                // Keep selection highlight
+                document.querySelectorAll('.prod-item').forEach(el => el.style.background = 'transparent');
+                document.getElementById(`prod-li-${selectedProduct.id}`).style.background = 'var(--bg-color)';
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        async function removeIngredient(ingredientId) {
+            if (!confirm('Remove this ingredient from the recipe?')) return;
+            
+            try {
+                await apiFetch(`/orders/products/${selectedProduct.id}/ingredients/${ingredientId}`, { method: 'DELETE' });
+                showToast('Ingredient removed');
+                await loadProducts();
+                selectProduct(selectedProduct.id);
+                renderProductsList();
+                document.querySelectorAll('.prod-item').forEach(el => el.style.background = 'transparent');
+                document.getElementById(`prod-li-${selectedProduct.id}`).style.background = 'var(--bg-color)';
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+        
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
