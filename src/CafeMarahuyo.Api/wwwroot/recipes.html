@@ -70,7 +70,7 @@
                 <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                     
                     <!-- Products List -->
-                    <div style="flex: 1; min-width: 300px; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border);">
+                    <div style="flex: 1 1 250px; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border);">
                         <h3>Products</h3>
                         <div style="margin-top: 15px; max-height: 600px; overflow-y: auto;">
                             <ul id="products-list" style="list-style: none; padding: 0; margin: 0;">
@@ -80,8 +80,8 @@
                     </div>
 
                     <!-- Recipe Details -->
-                    <div style="flex: 2; min-width: 400px; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 2 1 250px; background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                             <h3 id="recipe-title">Select a product...</h3>
                             <button class="btn btn-primary btn-sm" id="btn-add-ingredient" style="display: none;" onclick="openAddIngredientModal()">
                                 <span class="material-icons-round">add</span> Add Ingredient
