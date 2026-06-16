@@ -122,7 +122,14 @@
                         })
                     });
                     
-                    const data = await res.json();
+                    let data = {};
+                    try {
+                        data = await res.json();
+                    } catch (e) {
+                        if (!res.ok) {
+                            throw new Error('Registration failed (Server Error ' + res.status + ')');
+                        }
+                    }
                     
                     if (!res.ok) {
                         throw new Error(data.error || 'Failed to register');

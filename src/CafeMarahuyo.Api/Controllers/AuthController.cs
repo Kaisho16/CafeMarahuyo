@@ -111,14 +111,6 @@ namespace CafeMarahuyo.Api.Controllers
                     return Unauthorized(new { error = "Admin secret key is required to register an admin account." });
                 }
             }
-            else
-            {
-                // Authenticated user trying to create a staff account
-                if (!User.IsInRole("admin"))
-                {
-                    return Forbid();
-                }
-            }
 
             var existing = await _context.Users.AnyAsync(u => u.Username == req.Username);
             if (existing)
