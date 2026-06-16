@@ -570,6 +570,11 @@ body {
         box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
         min-height: 500px;
     }
+    .cart-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .cart-header > div { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+    .order-type-selector { width: 100%; display: flex; }
+    .order-type-btn { flex: 1; }
+    .discount-section { flex-wrap: wrap; }
     
     /* Modals */
     .customization-modal { width: 100%; border-radius: 20px 20px 0 0; }
