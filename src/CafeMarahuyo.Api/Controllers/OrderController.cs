@@ -372,6 +372,67 @@ namespace CafeMarahuyo.Api.Controllers
             return Ok(dtos);
         }
 
+        [HttpGet("export/csv")]
+        public async Task<IActionResult> ExportCsv([FromQuery] string? search, [FromQuery] string? dateFrom, [FromQuery] string? dateTo, [FromQuery] string? paymentMode, [FromQuery] string? orderType)
+        {
+            var query = _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var s = search.ToLower();
+                query = query.Where(o => o.OrderNumber.ToLower().Contains(s) || 
+                                         o.CashierName.ToLower().Contains(s) ||
+                                         o.Items.Any(i => i.Product.Name.ToLower().Contains(s)));
+            }
+
+            var filename = "cafe_marahuyo_pos_history";
+
+            if (!string.IsNullOrEmpty(dateFrom) && DateTime.TryParse(dateFrom, out DateTime from))
+            {
+                query = query.Where(o => o.OrderDate >= from.ToUniversalTime());
+                filename += $"_from_{dateFrom}";
+            }
+            if (!string.IsNullOrEmpty(dateTo) && DateTime.TryParse(dateTo, out DateTime to))
+            {
+                query = query.Where(o => o.OrderDate <= to.ToUniversalTime().AddDays(1).AddTicks(-1));
+                filename += $"_to_{dateTo}";
+            }
+
+            if (string.IsNullOrEmpty(dateFrom) && string.IsNullOrEmpty(dateTo))
+            {
+                var timestamp = DateTime.UtcNow.AddHours(8).ToString("MM-dd-yyyy_hh-mm-tt");
+                filename += $"_{timestamp}";
+            }
+            
+            filename += ".csv";
+
+            if (!string.IsNullOrEmpty(paymentMode))
+            {
+                query = query.Where(o => o.PaymentMode == paymentMode);
+            }
+            if (!string.IsNullOrEmpty(orderType))
+            {
+                query = query.Where(o => o.OrderType == orderType);
+            }
+
+            var orders = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Order #,Date & Time,Type,Payment Mode,Total Amount,Cashier,Items");
+
+            foreach (var o in orders)
+            {
+                var itemsStr = string.Join(" | ", o.Items.Select(i => $"{i.Quantity}x {i.Product?.Name}"));
+                sb.AppendLine($"\"{o.OrderNumber}\",{o.OrderDate.ToLocalTime():yyyy-MM-dd HH:mm:ss},{o.OrderType},{o.PaymentMode},{o.TotalAmount},\"{o.CashierName}\",\"{itemsStr}\"");
+            }
+
+            Response.Headers.Add("Content-Disposition", $"attachment; filename={filename}");
+            return File(System.Text.Encoding.UTF8.GetBytes(sb.ToString()), "text/csv");
+        }
+
         [HttpGet("history/summary")]
         public async Task<IActionResult> GetHistorySummary([FromQuery] string period = "daily") // daily, weekly, monthly
         {

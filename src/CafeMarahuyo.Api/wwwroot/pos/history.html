@@ -61,8 +61,12 @@
             <!-- Filters -->
             <div class="history-filters">
                 <input type="text" id="search-input" placeholder="Search Order # or Cashier..." style="width: 250px;">
-                <input type="date" id="date-from">
-                <input type="date" id="date-to">
+                <div class="date-filters" style="display: flex; align-items: center; gap: 8px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">From:</label>
+                    <input type="date" id="date-from">
+                    <label style="font-size: 0.85rem; color: var(--text-muted); margin-left: 8px;">To:</label>
+                    <input type="date" id="date-to">
+                </div>
                 <select id="payment-mode-filter">
                     <option value="">All Payment Modes</option>
                     <option value="Cash">Cash</option>
@@ -74,6 +78,9 @@
                     <option value="Takeout">Takeout</option>
                 </select>
                 <button class="promo-btn" style="background: var(--accent); color: white;" onclick="fetchHistory()">Filter</button>
+                <button class="promo-btn" style="background: var(--text-secondary); color: white; display: flex; align-items: center; gap: 5px;" onclick="exportHistory()">
+                    <span class="material-icons-round" style="font-size: 16px;">download</span> Export
+                </button>
             </div>
 
             <!-- Table -->

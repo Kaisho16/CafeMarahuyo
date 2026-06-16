@@ -101,6 +101,52 @@ async function fetchHistory() {
     }
 }
 
+async function exportHistory() {
+    try {
+        const search = document.getElementById('search-input').value;
+        const dateFrom = document.getElementById('date-from').value;
+        const dateTo = document.getElementById('date-to').value;
+        const pMode = document.getElementById('payment-mode-filter').value;
+        const oType = document.getElementById('order-type-filter').value;
+
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (dateFrom) params.append('dateFrom', dateFrom);
+        if (dateTo) params.append('dateTo', dateTo);
+        if (pMode) params.append('paymentMode', pMode);
+        if (oType) params.append('orderType', oType);
+
+        const res = await fetchWithAuth(`/api/orders/export/csv?${params.toString()}`);
+        if (!res.ok) throw new Error("Failed to export history");
+
+        const blob = await res.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        
+        let filename = 'pos_history_export.csv';
+        const disposition = res.headers.get('Content-Disposition');
+        if (disposition && disposition.indexOf('attachment') !== -1) {
+            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            const matches = filenameRegex.exec(disposition);
+            if (matches != null && matches[1]) {
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+        
+        showToast('History exported successfully');
+    } catch (e) {
+        console.error(e);
+        showToast("Error exporting history", true);
+    }
+}
+
 function renderHistoryTable(orders) {
     const tbody = document.getElementById('history-tbody');
     
