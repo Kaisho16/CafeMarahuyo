@@ -194,6 +194,11 @@ function openCustomizationModal(productId) {
     const categories = [...new Set(addons.map(a => a.category))];
     
     addonsContainer.innerHTML = categories.map(cat => {
+        // Common sense check: Prevent adding milk to Americano
+        if (customizingProduct.name.toLowerCase().includes('americano') && cat.toLowerCase() === 'milk') {
+            return '';
+        }
+
         const catAddons = addons.filter(a => a.category === cat);
         return `
             <div class="custom-section">
