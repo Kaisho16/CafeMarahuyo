@@ -295,7 +295,6 @@ function getCategoryIcon(iconName) {
 
 // ─── Initialization ──────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    initTheme();
     initSidebar();
     initModals();
 });

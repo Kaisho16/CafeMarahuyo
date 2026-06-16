@@ -95,22 +95,24 @@
             </div>
 
             <!-- Table -->
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>Order #</th>
-                        <th>Date & Time</th>
-                        <th>Type</th>
-                        <th>Items</th>
-                        <th>Cashier</th>
-                        <th>Total</th>
-                        <th>Payment</th>
-                    </tr>
-                </thead>
-                <tbody id="history-tbody">
-                    <!-- JS inject -->
-                </tbody>
-            </table>
+            <div class="history-table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Date & Time</th>
+                            <th>Type</th>
+                            <th>Items</th>
+                            <th>Cashier</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr><td colspan="7" class="empty-state">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 

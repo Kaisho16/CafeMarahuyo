@@ -99,18 +99,22 @@
                     <input type="text" id="prod-search" placeholder="Search products..." class="form-input" style="width: 300px;" oninput="renderProducts()">
                     <button class="promo-btn" style="background: var(--accent); color: white;" onclick="openProductModal()">+ New Product</button>
                 </div>
-                <table class="admin-table">
-                    <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th>Actions</th></tr></thead>
-                    <tbody id="prod-tbody"></tbody>
-                </table>
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th>Actions</th></tr></thead>
+                        <tbody id="prod-tbody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- SIZES TAB -->
             <div class="tab-content" id="tab-sizes">
-                <table class="admin-table">
-                    <thead><tr><th>Size Name</th><th>Price Modifier</th><th>Active</th><th>Actions</th></tr></thead>
-                    <tbody id="size-tbody"></tbody>
-                </table>
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead><tr><th>Size Name</th><th>Price Modifier</th><th>Active</th><th>Actions</th></tr></thead>
+                        <tbody id="size-tbody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- ADDONS TAB -->
@@ -118,10 +122,12 @@
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
                     <button class="promo-btn" style="background: var(--accent); color: white;" onclick="openAddonModal()">+ New Add-on</button>
                 </div>
-                <table class="admin-table">
-                    <thead><tr><th>Category</th><th>Name</th><th>Price</th><th>Active</th><th>Actions</th></tr></thead>
-                    <tbody id="addon-tbody"></tbody>
-                </table>
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead><tr><th>Category</th><th>Name</th><th>Price</th><th>Active</th><th>Actions</th></tr></thead>
+                        <tbody id="addon-tbody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- SETTINGS TAB -->
@@ -142,10 +148,12 @@
 
             <!-- AUDIT TAB -->
             <div class="tab-content" id="tab-audit">
-                <table class="admin-table">
-                    <thead><tr><th>Date & Time</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
-                    <tbody id="audit-tbody"></tbody>
-                </table>
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead><tr><th>Date & Time</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+                        <tbody id="audit-tbody"></tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
