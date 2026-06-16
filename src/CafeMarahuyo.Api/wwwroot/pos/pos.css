@@ -248,12 +248,14 @@ body {
 /* ─── CART PANEL ─── */
 .cart-panel {
     width: 380px;
-    background: var(--bg-card);
+    background: #ffffff !important; /* Force opaque white */
     border-left: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-lg);
-    z-index: 20;
+    position: relative; /* Required for z-index to work */
+    z-index: 50;
+    isolation: isolate; /* Create new stacking context */
 }
 
 .cart-header {
@@ -343,7 +345,9 @@ body {
 .cart-footer {
     padding: 24px;
     border-top: 1px solid var(--border);
-    background: #fcfcfc;
+    background: #fcfcfc !important;
+    position: relative;
+    z-index: 51;
 }
 
 .payment-modes {
@@ -619,6 +623,9 @@ body {
         border-top: 1px solid var(--border);
         box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
         min-height: 500px;
+        background: #ffffff !important;
+        position: relative;
+        z-index: 50;
     }
     .cart-header { flex-direction: column; align-items: flex-start; gap: 12px; }
     .cart-header > div { width: 100%; display: flex; justify-content: space-between; align-items: center; }
