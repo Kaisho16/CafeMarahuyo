@@ -232,9 +232,11 @@
                         <td>${escapeHtml(u.displayName)}</td>
                         <td><span class="badge badge-category">${escapeHtml(u.role)}</span></td>
                         <td>
+                            ${(u.id === currentUser.id || u.id === 1) ? '' : `
                             <button class="btn btn-sm" style="color: var(--danger); background: rgba(239, 68, 68, 0.1);" onclick="deleteUser(${u.id})">
                                 <span class="material-icons-round" style="font-size: 16px;">delete</span>
                             </button>
+                            `}
                         </td>
                     </tr>
                 `).join('');

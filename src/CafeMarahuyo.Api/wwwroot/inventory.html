@@ -93,10 +93,11 @@
                             <option value="low">Low Stock</option>
                             <option value="ok">In Stock</option>
                         </select>
-                        <div class="date-filters">
-                            <input type="date" id="export-date-from" class="form-input" title="Export Date From">
-                            <span style="color:var(--text-muted); align-self:center;">-</span>
-                            <input type="date" id="export-date-to" class="form-input" title="Export Date To">
+                        <div class="date-filters" style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                            <label style="font-size: 0.85rem; color: var(--text-muted);">Export From:</label>
+                            <input type="date" id="export-date-from" class="form-input" title="Export Date From" style="max-width: 150px;">
+                            <label style="font-size: 0.85rem; color: var(--text-muted); margin-left: 8px;">To:</label>
+                            <input type="date" id="export-date-to" class="form-input" title="Export Date To" style="max-width: 150px;">
                         </div>
                     </div>
 

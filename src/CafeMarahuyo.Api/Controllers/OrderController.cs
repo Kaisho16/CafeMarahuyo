@@ -568,6 +568,7 @@ namespace CafeMarahuyo.Api.Controllers
             p.Price = req.Price;
             p.IsAvailable = req.IsAvailable;
             p.Description = req.Description;
+            p.ImageUrl = req.ImageUrl;
             await LogAudit("Edit", p.Name, "Details updated");
             await _context.SaveChangesAsync();
             return Ok(new { message = "Product updated" });

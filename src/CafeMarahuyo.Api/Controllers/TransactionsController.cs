@@ -125,16 +125,28 @@ namespace CafeMarahuyo.Api.Controllers
             {
                 query = query.Where(t => t.Type == type);
             }
+            var filename = "cafe_marahuyo_transactions";
+
             if (!string.IsNullOrEmpty(date_from) && DateTime.TryParse(date_from, out var dtFrom))
             {
-                dtFrom = dtFrom.ToUniversalTime();
+                dtFrom = TimeZoneInfo.ConvertTimeToUtc(dtFrom, TimeZoneInfo.CreateCustomTimeZone("PH", TimeSpan.FromHours(8), "PH", "PH"));
                 query = query.Where(t => t.CreatedAt >= dtFrom);
+                filename += $"_from_{date_from}";
             }
             if (!string.IsNullOrEmpty(date_to) && DateTime.TryParse(date_to, out var dtTo))
             {
-                dtTo = dtTo.Date.AddDays(1).AddTicks(-1).ToUniversalTime();
+                dtTo = TimeZoneInfo.ConvertTimeToUtc(dtTo.Date.AddDays(1).AddTicks(-1), TimeZoneInfo.CreateCustomTimeZone("PH", TimeSpan.FromHours(8), "PH", "PH"));
                 query = query.Where(t => t.CreatedAt <= dtTo);
+                filename += $"_to_{date_to}";
             }
+
+            if (string.IsNullOrEmpty(date_from) && string.IsNullOrEmpty(date_to))
+            {
+                var timestamp = DateTime.UtcNow.AddHours(8).ToString("MM-dd-yyyy_hh-mm-tt");
+                filename += $"_{timestamp}";
+            }
+            
+            filename += ".csv";
 
             var transactions = await query
                 .OrderByDescending(t => t.CreatedAt)
@@ -147,11 +159,9 @@ namespace CafeMarahuyo.Api.Controllers
             foreach (var t in transactions)
             {
                 var typeLabel = t.Type == "stock_in" ? "Stock In" : "Stock Out";
-                sb.AppendLine($"{t.Id},{t.CreatedAt:yyyy-MM-ddTHH:mm:ss},\"{t.Item?.Name}\",\"{t.Item?.Category?.Name}\",{typeLabel},{t.Quantity},{t.Item?.Unit},{t.PreviousQuantity},{t.NewQuantity},\"{t.Notes?.Replace("\"", "\"\"")}\",\"{t.User?.DisplayName}\"");
+                sb.AppendLine($"{t.Id},{t.CreatedAt.AddHours(8):yyyy-MM-ddTHH:mm:ss},\"{t.Item?.Name}\",\"{t.Item?.Category?.Name}\",{typeLabel},{t.Quantity},{t.Item?.Unit},{t.PreviousQuantity},{t.NewQuantity},\"{t.Notes?.Replace("\"", "\"\"")}\",\"{t.User?.DisplayName}\"");
             }
 
-            var timestamp = DateTime.UtcNow.AddHours(8).ToString("MM-dd-yyyy_hh-mm-tt");
-            var filename = $"cafe_marahuyo_transactions_{timestamp}.csv";
             Response.Headers.Add("Content-Disposition", $"attachment; filename={filename}");
             return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv");
         }

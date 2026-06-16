@@ -41,17 +41,30 @@ namespace CafeMarahuyo.Api.Controllers
                 .Include(i => i.Batches)
                 .AsQueryable();
 
+            var filename = "cafe_marahuyo_inventory";
+
             if (!string.IsNullOrEmpty(date_from) && DateTime.TryParse(date_from, out var dtFrom))
             {
-                dtFrom = dtFrom.ToUniversalTime();
+                // Parse as local PH time, then to UTC
+                dtFrom = TimeZoneInfo.ConvertTimeToUtc(dtFrom, TimeZoneInfo.CreateCustomTimeZone("PH", TimeSpan.FromHours(8), "PH", "PH"));
                 query = query.Where(i => i.UpdatedAt >= dtFrom);
+                filename += $"_from_{date_from}";
             }
 
             if (!string.IsNullOrEmpty(date_to) && DateTime.TryParse(date_to, out var dtTo))
             {
-                dtTo = dtTo.Date.AddDays(1).AddTicks(-1).ToUniversalTime();
+                dtTo = TimeZoneInfo.ConvertTimeToUtc(dtTo.Date.AddDays(1).AddTicks(-1), TimeZoneInfo.CreateCustomTimeZone("PH", TimeSpan.FromHours(8), "PH", "PH"));
                 query = query.Where(i => i.UpdatedAt <= dtTo);
+                filename += $"_to_{date_to}";
             }
+
+            if (string.IsNullOrEmpty(date_from) && string.IsNullOrEmpty(date_to))
+            {
+                var timestamp = DateTime.UtcNow.AddHours(8).ToString("MM-dd-yyyy_hh-mm-tt");
+                filename += $"_{timestamp}";
+            }
+            
+            filename += ".csv";
 
             var items = await query
                 .OrderBy(i => i.Category!.Name).ThenBy(i => i.Name)
@@ -66,11 +79,9 @@ namespace CafeMarahuyo.Api.Controllers
                 var earliestExp = item.Batches.Where(b => b.ExpirationDate.HasValue).OrderBy(b => b.ExpirationDate).FirstOrDefault()?.ExpirationDate;
                 var exp = earliestExp?.ToString("yyyy-MM-dd") ?? "N/A";
                 
-                sb.AppendLine($"{item.Id},\"{item.Name}\",\"{item.Category?.Name}\",{item.Quantity},{item.Unit},{item.CostPerUnit},{item.MinStockLevel},{status},{exp},\"{item.Description?.Replace("\"", "\"\"")}\",{item.UpdatedAt:yyyy-MM-ddTHH:mm:ss}");
+                sb.AppendLine($"{item.Id},\"{item.Name}\",\"{item.Category?.Name}\",{item.Quantity},{item.Unit},{item.CostPerUnit},{item.MinStockLevel},{status},{exp},\"{item.Description?.Replace("\"", "\"\"")}\",{item.UpdatedAt.AddHours(8):yyyy-MM-ddTHH:mm:ss}");
             }
 
-            var timestamp = DateTime.UtcNow.AddHours(8).ToString("MM-dd-yyyy_hh-mm-tt");
-            var filename = $"cafe_marahuyo_inventory_{timestamp}.csv";
             Response.Headers.Add("Content-Disposition", $"attachment; filename={filename}");
             return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv");
         }

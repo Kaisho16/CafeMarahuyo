@@ -70,15 +70,15 @@ function updateStats(summary) {
 }
 
 function getChartThemeColors() {
-    const isDark = getTheme() === 'dark';
+    const isDark = false; // System defaults to light theme
     return {
-        textColor: isDark ? '#a89585' : '#6b5c4f',
-        gridColor: isDark ? 'rgba(200, 149, 108, 0.06)' : 'rgba(160, 107, 62, 0.08)',
-        tooltipBg: isDark ? '#241d17' : '#ffffff',
-        tooltipTitle: isDark ? '#f5efe8' : '#2c1f14',
-        tooltipBody: isDark ? '#a89585' : '#6b5c4f',
-        tooltipBorder: isDark ? 'rgba(200, 149, 108, 0.2)' : 'rgba(160, 107, 62, 0.15)',
-        doughnutBorder: isDark ? '#241d17' : '#ffffff'
+        textColor: '#6b5c4f',
+        gridColor: 'rgba(160, 107, 62, 0.08)',
+        tooltipBg: '#ffffff',
+        tooltipTitle: '#2c1f14',
+        tooltipBody: '#6b5c4f',
+        tooltipBorder: 'rgba(160, 107, 62, 0.15)',
+        doughnutBorder: '#ffffff'
     };
 }
 
