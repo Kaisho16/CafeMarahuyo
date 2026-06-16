@@ -91,6 +91,24 @@ namespace CafeMarahuyo.Api.Controllers
             return Ok(users);
         }
 
+        [HttpDelete("users/{id}")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound(new { error = "User not found" });
+
+            // Prevent deleting yourself
+            var currentUserIdStr = User.FindFirstValue("id");
+            if (currentUserIdStr != null && int.Parse(currentUserIdStr) == id)
+                return BadRequest(new { error = "Cannot delete your own account" });
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "User deleted successfully" });
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
         {
