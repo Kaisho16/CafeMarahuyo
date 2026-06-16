@@ -113,8 +113,10 @@ function openProductModal(id = null) {
             <input type="number" id="m-prod-price" class="form-input" value="${p ? p.price : 0}">
         </div>
         <div class="form-group">
-            <label>Image URL</label>
-            <input type="text" id="m-prod-img" class="form-input" value="${p ? (p.imageUrl||'') : '/pos/assets/default-coffee.png'}">
+            <label>Product Image</label>
+            <input type="file" id="m-prod-img-file" class="form-input" accept="image/*">
+            <input type="hidden" id="m-prod-img-url" value="${p ? (p.imageUrl||'') : '/pos/assets/default-coffee.png'}">
+            ${p && p.imageUrl ? `<small style="color:var(--text-muted);margin-top:4px;">Current image: <a href="${p.imageUrl}" target="_blank" style="color:var(--accent);text-decoration:none;">View Image</a></small>` : ''}
         </div>
         <div class="form-group">
             <label>Description</label>
@@ -134,21 +136,58 @@ function openProductModal(id = null) {
 }
 
 async function saveProduct(id) {
-    const req = {
-        name: document.getElementById('m-prod-name').value,
-        categoryName: document.getElementById('m-prod-cat').value,
-        price: parseFloat(document.getElementById('m-prod-price').value) || 0,
-        imageUrl: document.getElementById('m-prod-img').value,
-        description: document.getElementById('m-prod-desc').value
-    };
+    let imageUrl = document.getElementById('m-prod-img-url').value;
+    const fileInput = document.getElementById('m-prod-img-file');
     
-    if (id) {
-        req.isAvailable = document.getElementById('m-prod-avail').checked;
-        const res = await fetchWithAuth(`/api/orders/products/${id}`, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
-        if (res.ok) { showToast("Updated!"); closeAdminModal(); fetchProducts(); }
-    } else {
-        const res = await fetchWithAuth(`/api/orders/products`, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
-        if (res.ok) { showToast("Created!"); closeAdminModal(); fetchProducts(); }
+    // Disable save button to prevent double click
+    const saveBtn = document.getElementById('admin-save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
+
+    try {
+        if (fileInput.files && fileInput.files[0]) {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            const token = localStorage.getItem('cm_token');
+            const uploadRes = await fetch('/api/orders/products/upload-image', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            
+            if (uploadRes.ok) {
+                const uploadData = await uploadRes.json();
+                imageUrl = uploadData.imageUrl;
+            } else {
+                showToast("Failed to upload image", true);
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Save";
+                return;
+            }
+        }
+
+        const req = {
+            name: document.getElementById('m-prod-name').value,
+            categoryName: document.getElementById('m-prod-cat').value,
+            price: parseFloat(document.getElementById('m-prod-price').value) || 0,
+            imageUrl: imageUrl,
+            description: document.getElementById('m-prod-desc').value
+        };
+    
+        if (id) {
+            req.isAvailable = document.getElementById('m-prod-avail').checked;
+            const res = await fetchWithAuth(`/api/orders/products/${id}`, { method: 'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
+            if (res.ok) { showToast("Updated!"); closeAdminModal(); fetchProducts(); }
+        } else {
+            const res = await fetchWithAuth(`/api/orders/products`, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
+            if (res.ok) { showToast("Created!"); closeAdminModal(); fetchProducts(); }
+        }
+    } catch (err) {
+        showToast(err.message || 'Failed to save product', true);
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save";
     }
 }
 

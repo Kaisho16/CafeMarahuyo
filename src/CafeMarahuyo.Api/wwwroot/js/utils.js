@@ -8,40 +8,7 @@
 const API_BASE = '/api';
 
 // ─── Theme Management ────────────────────────────
-
-function getTheme() {
-    return localStorage.getItem('cm_theme') || 'dark';
-}
-
-function setTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('cm_theme', theme);
-    updateThemeUI(theme);
-}
-
-function toggleTheme() {
-    const current = getTheme();
-    setTheme(current === 'dark' ? 'light' : 'dark');
-}
-
-function updateThemeUI(theme) {
-    // Update all theme toggle icons and labels on the page
-    document.querySelectorAll('#theme-icon').forEach(el => {
-        el.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
-    });
-    document.querySelectorAll('#theme-label').forEach(el => {
-        el.textContent = theme === 'dark' ? 'Dark' : 'Light';
-    });
-}
-
-function initTheme() {
-    const theme = getTheme();
-    document.documentElement.setAttribute('data-theme', theme);
-    updateThemeUI(theme);
-}
-
-// Initialize theme immediately (before DOM ready)
-initTheme();
+// Theme management removed per user request. System defaults to light theme.
 
 // ─── Auth ────────────────────────────────────────
 
