@@ -116,7 +116,19 @@ function renderCategories() {
     const container = document.getElementById('category-filters');
     if (!container) return;
 
-    const cats = ['All', ...new Set(products.map(p => p.categoryName))];
+    // Fixed categories requested by user
+    const allowedCats = ['Coffee', 'Frappe', 'Fruit Tea'];
+    const dbCats = new Set(products.map(p => p.categoryName));
+    
+    // Only add 'All' and any allowed category that actually has products
+    const cats = ['All'];
+    allowedCats.forEach(cat => {
+        // Find if the exact name or partial name matches something in DB
+        if ([...dbCats].some(dbCat => dbCat.toLowerCase().includes(cat.toLowerCase()))) {
+            cats.push(cat);
+        }
+    });
+
     container.innerHTML = cats.map(c => 
         `<div class="category-chip ${c === currentCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</div>`
     ).join('');
@@ -132,7 +144,10 @@ function renderProducts() {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
 
-    const filtered = currentCategory === 'All' ? products : products.filter(p => p.categoryName === currentCategory);
+    const filtered = currentCategory === 'All' 
+        ? products 
+        : products.filter(p => p.categoryName.toLowerCase().includes(currentCategory.toLowerCase()));
+        
     grid.innerHTML = filtered.map(p => `
         <div class="product-card" onclick="openCustomizationModal(${p.id})">
             <div class="product-img-wrapper">
