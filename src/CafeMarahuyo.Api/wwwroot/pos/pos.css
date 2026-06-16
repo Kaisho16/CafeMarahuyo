@@ -94,6 +94,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0;
 }
 
 .header {
@@ -469,6 +470,31 @@ body {
     padding: 16px 32px; background: var(--accent); color: white; border: none; border-radius: var(--radius-md); font-size: 1.1rem; font-weight: 800; cursor: pointer;
 }
 
+
+/* ─── QUICK CASH BUTTONS ─── */
+.quick-cash-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+.quick-cash-btns button {
+    flex: 1;
+    min-width: 60px;
+    padding: 8px 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.quick-cash-btns button:hover {
+    background: var(--text-primary);
+    color: white;
+}
+
 /* ─── DIGITAL RECEIPT MODAL ─── */
 .receipt-modal {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
@@ -593,9 +619,9 @@ body {
     .custom-modal-footer { padding: 16px 20px; }
     .ice-sugar-wrapper { flex-direction: column; gap: 16px; }
     
-    .admin-table-container { overflow-x: auto; }
+    .admin-table-container { overflow-x: auto; max-width: 100%; min-width: 0; }
     .admin-table { min-width: 700px; }
-    .history-table-container { overflow-x: auto; }
+    .history-table-container { overflow-x: auto; max-width: 100%; min-width: 0; }
     .history-table { min-width: 700px; }
     .history-filters { flex-direction: column; align-items: stretch; }
     
