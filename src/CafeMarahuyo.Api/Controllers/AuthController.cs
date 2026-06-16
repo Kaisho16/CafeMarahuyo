@@ -103,12 +103,12 @@ namespace CafeMarahuyo.Api.Controllers
 
             var role = req.Role ?? "staff";
 
-            if (role == "admin" || !User.Identity!.IsAuthenticated)
+            if (role == "admin")
             {
                 var secretKey = _config["AdminSecretKey"];
                 if (string.IsNullOrEmpty(req.SecretKey) || req.SecretKey != secretKey)
                 {
-                    return Unauthorized(new { error = "Valid secret key is required to register an admin or to register without being logged in" });
+                    return Unauthorized(new { error = "Admin secret key is required to register an admin account." });
                 }
             }
             else

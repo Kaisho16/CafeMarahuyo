@@ -321,10 +321,14 @@ function setPaymentMode(mode) {
     event.target.classList.add('active');
     
     const cashSec = document.getElementById('cash-tendering-section');
+    const ewalletSec = document.getElementById('ewallet-reference-section');
+    
     if (mode === 'Cash') {
         cashSec.style.display = 'block';
+        if (ewalletSec) ewalletSec.style.display = 'none';
     } else {
         cashSec.style.display = 'none';
+        if (ewalletSec) ewalletSec.style.display = 'block';
         amountTendered = 0;
         document.getElementById('amount-tendered').value = '';
     }
@@ -509,6 +513,7 @@ async function checkout() {
         discountType: currentDiscountType,
         discountValue: currentDiscountValue,
         promoCode: currentPromoCode,
+        referenceCode: document.getElementById('reference-code') ? document.getElementById('reference-code').value : null,
         items: cart.map(i => ({
             productId: i.product.id,
             quantity: i.quantity,
@@ -548,6 +553,9 @@ async function checkout() {
         document.getElementById('discount-value').style.display = 'none';
         document.getElementById('discount-value').value = '';
         document.getElementById('amount-tendered').value = '';
+        if (document.getElementById('reference-code')) {
+            document.getElementById('reference-code').value = '';
+        }
         updateCart();
     } catch (e) {
         showToast(e.message, true);

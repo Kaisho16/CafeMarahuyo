@@ -75,11 +75,10 @@
     <script>
         function toggleSecretKey() {
             const role = document.getElementById('reg-role').value;
-            const token = localStorage.getItem('cm_token');
             const secretGroup = document.getElementById('secret-key-group');
             
-            // Show secret key if role is admin OR if the user is not logged in
-            if (role === 'admin' || !token) {
+            // Show secret key only if role is admin
+            if (role === 'admin') {
                 secretGroup.style.display = 'block';
             } else {
                 secretGroup.style.display = 'none';

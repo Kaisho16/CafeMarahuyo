@@ -239,6 +239,7 @@ namespace CafeMarahuyo.Api.Controllers
                     ChangeAmount = change,
                     CashierName = cashierName,
                     ReceiptFooter = receiptFooter,
+                    PaymentReference = req.ReferenceCode,
                     Items = orderItems
                 };
 
