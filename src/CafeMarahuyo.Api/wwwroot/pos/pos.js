@@ -117,17 +117,7 @@ function renderCategories() {
     if (!container) return;
 
     // Fixed categories requested by user
-    const allowedCats = ['Coffee', 'Frappe', 'Fruit Tea'];
-    const dbCats = new Set(products.map(p => p.categoryName));
-    
-    // Only add 'All' and any allowed category that actually has products
-    const cats = ['All'];
-    allowedCats.forEach(cat => {
-        // Find if the exact name or partial name matches something in DB
-        if ([...dbCats].some(dbCat => dbCat.toLowerCase().includes(cat.toLowerCase()))) {
-            cats.push(cat);
-        }
-    });
+    const cats = ['All', 'Coffee', 'Frappe', 'Fruit Tea'];
 
     container.innerHTML = cats.map(c => 
         `<div class="category-chip ${c === currentCategory ? 'active' : ''}" onclick="setCategory('${c}')">${c}</div>`

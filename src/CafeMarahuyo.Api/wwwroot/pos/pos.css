@@ -553,6 +553,14 @@ body {
 .history-table-container { overflow-x: auto; max-width: 100%; min-width: 0; }
 .history-table { min-width: 700px; }
 
+.history-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
 /* ─── RESPONSIVE DESIGN ─────────────────────── */
 /* Mobile Sidebar Toggle */
 .mobile-toggle {
