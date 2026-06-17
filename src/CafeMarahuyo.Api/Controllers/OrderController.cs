@@ -601,6 +601,28 @@ namespace CafeMarahuyo.Api.Controllers
 
             return Ok(new { message = "Ingredient removed from recipe" });
         }
+        [HttpPost("products/upload-image")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> UploadProductImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { error = "No file uploaded" });
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var imageUrl = $"/uploads/products/{uniqueFileName}";
+            return Ok(new { imageUrl });
+        }
 
 
         [HttpPost("products")]

@@ -15,7 +15,7 @@ function initAuth() {
 
     const isAdmin = ['admin', 'Inventory Manager', 'POS Manager'].includes(user.role);
     const roleEl = document.getElementById('cashier-role');
-    if (roleEl) roleEl.textContent = isAdmin ? 'POS Manager' : 'Cashier';
+    if (roleEl) roleEl.textContent = user.role.toUpperCase();
 
     if (isAdmin) {
         const menuMgt = document.getElementById('nav-menu-management');

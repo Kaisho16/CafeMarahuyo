@@ -39,7 +39,7 @@ function initAuth() {
 
     const isAdmin = ['admin', 'Inventory Manager', 'POS Manager'].includes(user.role);
     const roleEl = document.getElementById('cashier-role');
-    if (roleEl) roleEl.textContent = isAdmin ? 'POS Manager' : 'Cashier';
+    if (roleEl) roleEl.textContent = user.role.toUpperCase();
 
     if (isAdmin) {
         const menuMgt = document.getElementById('nav-menu-management');
@@ -406,8 +406,16 @@ async function applyDiscount() {
             currentDiscountType = type;
             currentDiscountValue = parseFloat(valStr) || 0;
             currentPromoCode = null;
+            if (currentDiscountValue > 0) {
+                showToast("Discount applied!");
+            }
         }
         updateCart();
+        
+        // Reset the discount input fields for better UX
+        document.getElementById('discount-type').value = '';
+        document.getElementById('discount-value').value = '';
+        document.getElementById('discount-value').style.display = 'none';
     } finally {
         if (btn) btn.disabled = false;
     }

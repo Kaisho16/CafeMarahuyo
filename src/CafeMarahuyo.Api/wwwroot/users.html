@@ -131,7 +131,6 @@
                     <select id="new-role" class="form-input">
                         <option value="staff">Staff</option>
                         <option value="admin">Admin</option>
-                        <option value="Inventory Manager">Inventory Manager</option>
                     </select>
                 </div>
                 <div class="form-group" id="admin-secret-group" style="display:none;">
@@ -229,9 +228,9 @@
                     return;
                 }
 
-                tbody.innerHTML = users.map(u => `
+                tbody.innerHTML = users.map((u, index) => `
                     <tr>
-                        <td>${u.id}</td>
+                        <td>${index + 1}</td>
                         <td><strong>${escapeHtml(u.username)}</strong></td>
                         <td>${escapeHtml(u.displayName)}</td>
                         <td><span class="badge badge-category">${escapeHtml(u.role)}</span></td>

@@ -369,14 +369,14 @@ textarea.form-input { resize: vertical; min-height: 80px; }
 }
 
 .sidebar-logo {
-    width: 44px;
+    width: 60px;
     height: auto;
     object-fit: contain;
 }
 
 .sidebar-brand { flex: 1; }
 .sidebar-brand h2 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
-.sidebar-brand p { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px; }
+.sidebar-brand p { display: none; }
 
 .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
 

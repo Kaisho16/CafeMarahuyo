@@ -25,7 +25,7 @@ function initAuth() {
     if (cashierEl) cashierEl.textContent = user.displayName;
 
     const roleEl = document.getElementById('cashier-role');
-    if (roleEl) roleEl.textContent = 'POS Manager';
+    if (roleEl) roleEl.textContent = user.role.toUpperCase();
 }
 
 function logout() {
@@ -111,6 +111,11 @@ function openProductModal(id = null) {
             <label>Price (₱)</label>
             <input type="number" id="m-prod-price" class="form-input" value="${p ? p.price : 0}">
         </div>
+        <div class="form-group">
+            <label>Product Image</label>
+            ${p && p.imageUrl ? `<img src="${p.imageUrl}" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: 8px;">` : ''}
+            <input type="file" id="m-prod-image" class="form-input" accept="image/*">
+        </div>
 
         <div class="form-group">
             <label>Description</label>
@@ -143,9 +148,25 @@ async function saveProduct(id) {
             name: document.getElementById('m-prod-name').value,
             categoryName: document.getElementById('m-prod-cat').value,
             price: parseFloat(document.getElementById('m-prod-price').value) || 0,
-            imageUrl: null,
+            imageUrl: id ? (allProducts.find(x => x.id === id)?.imageUrl) : null,
             description: document.getElementById('m-prod-desc').value
         };
+
+        const imgFile = document.getElementById('m-prod-image')?.files[0];
+        if (imgFile) {
+            const formData = new FormData();
+            formData.append('file', imgFile);
+            const uploadRes = await fetchWithAuth('/api/orders/products/upload-image', {
+                method: 'POST',
+                body: formData
+            });
+            if (uploadRes.ok) {
+                const uploadData = await uploadRes.json();
+                req.imageUrl = uploadData.imageUrl;
+            } else {
+                throw new Error("Failed to upload image");
+            }
+        }
     
         if (id) {
             req.isAvailable = document.getElementById('m-prod-avail').checked;
@@ -324,7 +345,7 @@ async function saveSettings() {
 
 // ========================== AUDIT LOGS ==========================
 async function fetchAuditLogs() {
-    const res = await fetchWithAuth('/api/orders/products/audit');
+    const res = await fetchWithAuth('/api/orders/products/archives');
     if (res.ok) {
         allLogs = await res.json();
         document.getElementById('audit-tbody').innerHTML = allLogs.map(l => `

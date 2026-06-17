@@ -52,8 +52,8 @@ function setupUserUI() {
 
     if (avatar) avatar.textContent = user.displayName.charAt(0).toUpperCase();
     if (displayName) displayName.textContent = user.displayName;
+    if (role) role.textContent = user.role.toUpperCase();
     const isAdmin = ['admin', 'Inventory Manager', 'POS Manager'].includes(user.role);
-    if (role) role.textContent = isAdmin ? 'Inventory Manager' : 'Staff';
 
     // Show admin-only UI elements
     if (isAdmin) {

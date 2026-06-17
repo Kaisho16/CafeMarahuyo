@@ -117,10 +117,12 @@
                 <div class="form-group">
                     <label for="ingredient-qty">Quantity Required *</label>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="number" id="ingredient-qty" class="form-input" min="1" step="1" required style="flex: 1;">
-                        <span id="ingredient-unit" style="color: var(--text-secondary); width: 50px;">-</span>
+                        <input type="number" id="ingredient-qty" class="form-input" min="0" step="any" required style="flex: 1;">
+                        <select id="ingredient-unit" class="form-input" style="width: 140px;" disabled>
+                            <option value="">-</option>
+                        </select>
                     </div>
-                    <small class="text-muted" style="display:block; margin-top:5px; font-size: 0.8rem;">Amount to deduct per order</small>
+                    <small class="text-muted" style="display:block; margin-top:5px; font-size: 0.8rem;" id="qty-warning">Amount to deduct per order</small>
                 </div>
             </div>
             <div class="modal-footer">
@@ -177,7 +179,36 @@
                 
                 select.addEventListener('change', (e) => {
                     const opt = e.target.options[e.target.selectedIndex];
-                    document.getElementById('ingredient-unit').textContent = opt ? opt.dataset.unit : '-';
+                    const unit = opt ? opt.dataset.unit : '';
+                    const unitSelect = document.getElementById('ingredient-unit');
+                    const warning = document.getElementById('qty-warning');
+                    
+                    if (!unit) {
+                        unitSelect.innerHTML = '<option value="">-</option>';
+                        unitSelect.disabled = true;
+                        warning.textContent = 'Amount to deduct per order';
+                        warning.style.color = '';
+                    } else if (unit === 'L' || unit === 'Liters' || unit === 'kg' || unit === 'Kilograms') {
+                        unitSelect.innerHTML = `<option value="${unit}">${escapeHtml(unit)}</option>`;
+                        unitSelect.disabled = true;
+                        warning.textContent = `Warning: System uses whole numbers. Fractional ${unit} (e.g. 0.5) will be saved as 0. Please change base inventory unit to ml/g for small recipes.`;
+                        warning.style.color = 'var(--danger)';
+                    } else if (unit === 'ml' || unit === 'Milliliters') {
+                        unitSelect.innerHTML = '<option value="ml" selected>Milliliters (ml)</option><option value="L">Liters (L)</option>';
+                        unitSelect.disabled = false;
+                        warning.textContent = 'Will be converted to ml automatically.';
+                        warning.style.color = '';
+                    } else if (unit === 'g' || unit === 'Grams') {
+                        unitSelect.innerHTML = '<option value="g" selected>Grams (g)</option><option value="kg">Kilograms (kg)</option>';
+                        unitSelect.disabled = false;
+                        warning.textContent = 'Will be converted to g automatically.';
+                        warning.style.color = '';
+                    } else {
+                        unitSelect.innerHTML = `<option value="${unit}">${escapeHtml(unit)}</option>`;
+                        unitSelect.disabled = true;
+                        warning.textContent = 'Amount to deduct per order';
+                        warning.style.color = '';
+                    }
                 });
             } catch (err) {
                 showToast('Failed to load inventory items', 'error');
@@ -267,11 +298,20 @@
             if (!selectedProduct) return;
             
             const itemId = document.getElementById('ingredient-select').value;
-            const qty = document.getElementById('ingredient-qty').value;
+            let qty = parseFloat(document.getElementById('ingredient-qty').value);
+            const unitVal = document.getElementById('ingredient-unit').value;
             
-            if (!itemId || !qty || qty <= 0) {
+            if (!itemId || isNaN(qty) || qty <= 0) {
                 showToast('Please provide valid item and quantity', 'warning');
                 return;
+            }
+
+            // Conversion logic: if user enters L or kg, but the base unit is ml/g, we multiply by 1000
+            if (unitVal === 'L' || unitVal === 'kg') {
+                const opt = document.getElementById('ingredient-select').options[document.getElementById('ingredient-select').selectedIndex];
+                if (opt && (opt.dataset.unit === 'ml' || opt.dataset.unit === 'Milliliters' || opt.dataset.unit === 'g' || opt.dataset.unit === 'Grams')) {
+                    qty = qty * 1000;
+                }
             }
 
             btn.disabled = true;
@@ -281,7 +321,7 @@
                     method: 'POST',
                     body: {
                         inventoryItemId: parseInt(itemId),
-                        quantityRequired: parseInt(qty)
+                        quantityRequired: Math.round(qty)
                     }
                 });
                 showToast('Ingredient added');

@@ -115,9 +115,9 @@ namespace CafeMarahuyo.Api.Controllers
             if (string.IsNullOrEmpty(req.Username) || string.IsNullOrEmpty(req.Password) || string.IsNullOrEmpty(req.DisplayName))
                 return BadRequest(new { error = "Username, password, and display name are required" });
 
-            var validRoles = new[] { "admin", "staff", "Inventory Manager" };
+            var validRoles = new[] { "admin", "staff" };
             if (!string.IsNullOrEmpty(req.Role) && !validRoles.Contains(req.Role))
-                return BadRequest(new { error = "Role must be admin, staff, or Inventory Manager" });
+                return BadRequest(new { error = "Role must be admin or staff" });
 
             var role = req.Role ?? "staff";
 
