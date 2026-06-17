@@ -22,13 +22,13 @@ namespace CafeMarahuyo.Shared.DTOs
         public int InventoryItemId { get; set; }
         public string InventoryItemName { get; set; } = string.Empty;
         public string Unit { get; set; } = string.Empty;
-        public int QuantityRequired { get; set; }
+        public decimal QuantityRequired { get; set; }
     }
 
     public class CreateProductIngredientRequest
     {
         public int InventoryItemId { get; set; }
-        public int QuantityRequired { get; set; }
+        public decimal QuantityRequired { get; set; }
     }
 
     public class SizeModifierDto

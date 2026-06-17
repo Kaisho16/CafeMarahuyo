@@ -93,8 +93,8 @@ namespace CafeMarahuyo.Shared.Data
                 else
                 {
                     // Split quantity into two batches to demonstrate overlapping dates
-                    int qty1 = item.Quantity / 2;
-                    int qty2 = item.Quantity - qty1;
+                    decimal qty1 = Math.Floor(item.Quantity / 2m);
+                    decimal qty2 = item.Quantity - qty1;
                     
                     DateTime baseDate = DateTime.UtcNow.AddDays(rand.Next(10, 60));
                     
@@ -131,9 +131,9 @@ namespace CafeMarahuyo.Shared.Data
                     var batch = batches.FirstOrDefault(b => b.InventoryItemId == item.Id);
                     
                     bool isStockIn = rand.NextDouble() > 0.6;
-                    int qty = 1 + rand.Next(10);
-                    int prevQty = item.Quantity;
-                    int newQty = isStockIn ? prevQty + qty : Math.Max(0, prevQty - qty);
+                    decimal qty = 1 + rand.Next(10);
+                    decimal prevQty = item.Quantity;
+                    decimal newQty = isStockIn ? prevQty + qty : Math.Max(0m, prevQty - qty);
 
                     var txDate = date.AddHours(-rand.Next(8)).AddMinutes(-rand.Next(60));
 

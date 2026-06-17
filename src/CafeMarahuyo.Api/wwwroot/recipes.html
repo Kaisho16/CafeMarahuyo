@@ -173,9 +173,15 @@
                 const data = await apiFetch('/inventory');
                 allInventoryItems = data.items || [];
                 
+                const excludedCategories = ['packaging', 'supplies', 'consumables', 'equipment', 'miscellaneous', 'cleaning', 'utilities'];
+                const filteredItems = allInventoryItems.filter(i => {
+                    const catName = (i.category_name || i.categoryName || '').toLowerCase();
+                    return !excludedCategories.some(excluded => catName.includes(excluded));
+                });
+                
                 const select = document.getElementById('ingredient-select');
                 select.innerHTML = '<option value="">-- Select an item --</option>' + 
-                    allInventoryItems.map(i => `<option value="${i.id}" data-unit="${i.unit}">${escapeHtml(i.name)} (${escapeHtml(i.unit)})</option>`).join('');
+                    filteredItems.map(i => `<option value="${i.id}" data-unit="${i.unit}">${escapeHtml(i.name)} (${escapeHtml(i.unit)})</option>`).join('');
                 
                 select.addEventListener('change', (e) => {
                     const opt = e.target.options[e.target.selectedIndex];
@@ -187,27 +193,26 @@
                         unitSelect.innerHTML = '<option value="">-</option>';
                         unitSelect.disabled = true;
                         warning.textContent = 'Amount to deduct per order';
-                        warning.style.color = '';
-                    } else if (unit === 'L' || unit === 'Liters' || unit === 'kg' || unit === 'Kilograms') {
-                        unitSelect.innerHTML = `<option value="${unit}">${escapeHtml(unit)}</option>`;
-                        unitSelect.disabled = true;
-                        warning.textContent = `Warning: System uses whole numbers. Fractional ${unit} (e.g. 0.5) will be saved as 0. Please change base inventory unit to ml/g for small recipes.`;
-                        warning.style.color = 'var(--danger)';
+                    } else if (unit === 'L' || unit === 'Liters') {
+                        unitSelect.innerHTML = `<option value="${unit}" selected>${escapeHtml(unit)}</option><option value="ml">Milliliters (ml)</option>`;
+                        unitSelect.disabled = false;
+                        warning.textContent = 'If ml is selected, it will automatically save as the correct fractional Liters.';
+                    } else if (unit === 'kg' || unit === 'Kilograms') {
+                        unitSelect.innerHTML = `<option value="${unit}" selected>${escapeHtml(unit)}</option><option value="g">Grams (g)</option>`;
+                        unitSelect.disabled = false;
+                        warning.textContent = 'If grams is selected, it will automatically save as the correct fractional kg.';
                     } else if (unit === 'ml' || unit === 'Milliliters') {
                         unitSelect.innerHTML = '<option value="ml" selected>Milliliters (ml)</option><option value="L">Liters (L)</option>';
                         unitSelect.disabled = false;
-                        warning.textContent = 'Will be converted to ml automatically.';
-                        warning.style.color = '';
+                        warning.textContent = 'Will be converted to ml automatically if L is selected.';
                     } else if (unit === 'g' || unit === 'Grams') {
                         unitSelect.innerHTML = '<option value="g" selected>Grams (g)</option><option value="kg">Kilograms (kg)</option>';
                         unitSelect.disabled = false;
-                        warning.textContent = 'Will be converted to g automatically.';
-                        warning.style.color = '';
+                        warning.textContent = 'Will be converted to g automatically if kg is selected.';
                     } else {
                         unitSelect.innerHTML = `<option value="${unit}">${escapeHtml(unit)}</option>`;
                         unitSelect.disabled = true;
                         warning.textContent = 'Amount to deduct per order';
-                        warning.style.color = '';
                     }
                 });
             } catch (err) {
@@ -306,12 +311,18 @@
                 return;
             }
 
-            // Conversion logic: if user enters L or kg, but the base unit is ml/g, we multiply by 1000
-            if (unitVal === 'L' || unitVal === 'kg') {
-                const opt = document.getElementById('ingredient-select').options[document.getElementById('ingredient-select').selectedIndex];
-                if (opt && (opt.dataset.unit === 'ml' || opt.dataset.unit === 'Milliliters' || opt.dataset.unit === 'g' || opt.dataset.unit === 'Grams')) {
-                    qty = qty * 1000;
-                }
+            // Conversion logic:
+            const opt = document.getElementById('ingredient-select').options[document.getElementById('ingredient-select').selectedIndex];
+            const baseUnit = opt ? opt.dataset.unit : '';
+            
+            // If user enters L or kg, but the base unit is ml/g, we multiply by 1000
+            if ((unitVal === 'L' || unitVal === 'kg') && (baseUnit === 'ml' || baseUnit === 'Milliliters' || baseUnit === 'g' || baseUnit === 'Grams')) {
+                qty = qty * 1000;
+            }
+            
+            // If user enters ml or g, but the base unit is L or kg, we divide by 1000
+            if ((unitVal === 'ml' || unitVal === 'g') && (baseUnit === 'L' || baseUnit === 'Liters' || baseUnit === 'kg' || baseUnit === 'Kilograms')) {
+                qty = qty / 1000;
             }
 
             btn.disabled = true;
@@ -321,7 +332,7 @@
                     method: 'POST',
                     body: {
                         inventoryItemId: parseInt(itemId),
-                        quantityRequired: Math.round(qty)
+                        quantityRequired: qty
                     }
                 });
                 showToast('Ingredient added');

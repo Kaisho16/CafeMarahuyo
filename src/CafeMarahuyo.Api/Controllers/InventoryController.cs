@@ -525,7 +525,7 @@ namespace CafeMarahuyo.Api.Controllers
                 item.Quantity = newQty;
                 item.UpdatedAt = DateTime.UtcNow;
 
-                int remainingToDeduct = req.Quantity;
+                decimal remainingToDeduct = req.Quantity;
                 
                 // Sort batches: Earliest expiring first. Null expirations go last.
                 var orderedBatches = item.Batches
@@ -539,7 +539,7 @@ namespace CafeMarahuyo.Api.Controllers
 
                     if (batch.Quantity > 0)
                     {
-                        int deductAmt = Math.Min(batch.Quantity, remainingToDeduct);
+                        decimal deductAmt = Math.Min(batch.Quantity, remainingToDeduct);
                         batch.Quantity -= deductAmt;
                         batch.UpdatedAt = DateTime.UtcNow;
                         remainingToDeduct -= deductAmt;

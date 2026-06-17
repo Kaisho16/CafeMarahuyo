@@ -19,8 +19,8 @@ namespace CafeMarahuyo.Shared.Entities
         public int InventoryItemId { get; set; }
 
         [Required]
-        [Column("quantity_required")]
-        public int QuantityRequired { get; set; }
+        [Column("quantity_required", TypeName = "decimal(18,4)")]
+        public decimal QuantityRequired { get; set; }
 
         public Product? Product { get; set; }
     }

@@ -29,7 +29,7 @@ namespace CafeMarahuyo.Api.Services
 
                 foreach (var ingredient in item.Product.Ingredients)
                 {
-                    int quantityToDeduct = ingredient.QuantityRequired * item.Quantity;
+                    decimal quantityToDeduct = ingredient.QuantityRequired * item.Quantity;
 
                     var invItem = await _context.InventoryItems
                         .Include(i => i.Batches)
@@ -41,7 +41,7 @@ namespace CafeMarahuyo.Api.Services
                         invItem.Quantity -= quantityToDeduct;
                         invItem.UpdatedAt = DateTime.UtcNow;
 
-                        int remaining = quantityToDeduct;
+                        decimal remaining = quantityToDeduct;
                         var orderedBatches = invItem.Batches
                             .OrderBy(b => b.ExpirationDate.HasValue ? 0 : 1)
                             .ThenBy(b => b.ExpirationDate)
@@ -52,7 +52,7 @@ namespace CafeMarahuyo.Api.Services
                             if (remaining <= 0) break;
                             if (batch.Quantity > 0)
                             {
-                                int deductAmt = Math.Min(batch.Quantity, remaining);
+                                decimal deductAmt = Math.Min(batch.Quantity, remaining);
                                 batch.Quantity -= deductAmt;
                                 batch.UpdatedAt = DateTime.UtcNow;
                                 remaining -= deductAmt;

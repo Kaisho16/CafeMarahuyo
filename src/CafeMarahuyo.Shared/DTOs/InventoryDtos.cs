@@ -11,7 +11,7 @@ namespace CafeMarahuyo.Shared.DTOs
         [JsonPropertyName("inventory_item_id")]
         public int InventoryItemId { get; set; }
         
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         
         [JsonPropertyName("expiration_date")]
         public string? ExpirationDate { get; set; }
@@ -25,7 +25,7 @@ namespace CafeMarahuyo.Shared.DTOs
         [JsonPropertyName("category_id")]
         public int CategoryId { get; set; }
         
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public string Unit { get; set; } = string.Empty;
         
         [JsonPropertyName("cost_per_unit")]
@@ -75,7 +75,7 @@ namespace CafeMarahuyo.Shared.DTOs
         [JsonPropertyName("category_id")]
         public int CategoryId { get; set; }
         
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public string Unit { get; set; } = string.Empty;
         
         [JsonPropertyName("cost_per_unit")]
@@ -113,7 +113,7 @@ namespace CafeMarahuyo.Shared.DTOs
 
     public class StockAdjustmentRequest
     {
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public string? Notes { get; set; }
         
         [JsonPropertyName("expiration_date")]

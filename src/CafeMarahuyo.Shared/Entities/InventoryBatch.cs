@@ -18,8 +18,8 @@ namespace CafeMarahuyo.Shared.Entities
         public InventoryItem? Item { get; set; }
 
         [Required]
-        [Column("quantity")]
-        public int Quantity { get; set; }
+        [Column("quantity", TypeName = "decimal(18,4)")]
+        public decimal Quantity { get; set; }
 
         [Column("expiration_date")]
         public DateTime? ExpirationDate { get; set; }

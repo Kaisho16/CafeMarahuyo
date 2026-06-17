@@ -12,13 +12,13 @@ namespace CafeMarahuyo.Shared.DTOs
         public int ItemId { get; set; }
         
         public string Type { get; set; } = string.Empty;
-        public int Quantity { get; set; }
+        public decimal Quantity { get; set; }
         
         [JsonPropertyName("previous_quantity")]
-        public int PreviousQuantity { get; set; }
+        public decimal PreviousQuantity { get; set; }
         
         [JsonPropertyName("new_quantity")]
-        public int NewQuantity { get; set; }
+        public decimal NewQuantity { get; set; }
         
         [JsonPropertyName("expiration_date")]
         public string? ExpirationDate { get; set; }

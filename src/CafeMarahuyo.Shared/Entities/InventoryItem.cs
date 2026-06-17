@@ -26,8 +26,8 @@ namespace CafeMarahuyo.Shared.Entities
         public ICollection<InventoryBatch> Batches { get; set; } = new List<InventoryBatch>();
 
         [Required]
-        [Column("quantity")]
-        public int Quantity { get; set; } = 0;
+        [Column("quantity", TypeName = "decimal(18,4)")]
+        public decimal Quantity { get; set; } = 0;
 
         [Required]
         [MaxLength(20)]

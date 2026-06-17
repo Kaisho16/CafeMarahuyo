@@ -23,16 +23,16 @@ namespace CafeMarahuyo.Shared.Entities
         public string Type { get; set; } = string.Empty; // 'stock_in', 'stock_out'
 
         [Required]
-        [Column("quantity")]
-        public int Quantity { get; set; }
+        [Column("quantity", TypeName = "decimal(18,4)")]
+        public decimal Quantity { get; set; }
 
         [Required]
-        [Column("previous_quantity")]
-        public int PreviousQuantity { get; set; }
+        [Column("previous_quantity", TypeName = "decimal(18,4)")]
+        public decimal PreviousQuantity { get; set; }
 
         [Required]
-        [Column("new_quantity")]
-        public int NewQuantity { get; set; }
+        [Column("new_quantity", TypeName = "decimal(18,4)")]
+        public decimal NewQuantity { get; set; }
 
         [Column("expiration_date")]
         public DateTime? ExpirationDate { get; set; }
