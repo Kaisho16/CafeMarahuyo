@@ -480,7 +480,7 @@ async function saveDiscount(id) {
         };
 
         const method = id ? 'PUT' : 'POST';
-        const url = id ? \`/api/promos/\${id}\` : '/api/promos';
+        const url = id ? `/api/promos/${id}` : '/api/promos';
         const res = await fetchWithAuth(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
         
         if (res.ok) { showToast(id ? "Updated!" : "Created!"); closeAdminModal(); fetchDiscounts(); }
@@ -495,7 +495,7 @@ async function saveDiscount(id) {
 async function deleteDiscount(id) {
     if(!confirm("Are you sure you want to delete this discount?")) return;
     try {
-        const res = await fetchWithAuth(\`/api/promos/\${id}\`, { method: 'DELETE' });
+        const res = await fetchWithAuth(`/api/promos/${id}`, { method: 'DELETE' });
         if(res.ok) { showToast("Deleted!"); fetchDiscounts(); }
         else throw new Error("Failed to delete");
     } catch(e) {
