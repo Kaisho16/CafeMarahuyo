@@ -213,10 +213,8 @@ namespace CafeMarahuyo.Api.Controllers
                 var discountedSubtotal = subtotal - discountAmount;
                 var totalAmount = discountedSubtotal;
                 
-                // Tax-inclusive math: Total = Subtotal. Tax is implicitly inside the total.
-                var taxAmount = taxRatePercent > 0 
-                    ? discountedSubtotal - (discountedSubtotal / (1 + (taxRatePercent / 100))) 
-                    : 0;
+                // User-requested pseudo-inclusive math: Total = Subtotal, Tax = Subtotal * TaxRate
+                var taxAmount = discountedSubtotal * (taxRatePercent / 100);
 
                 var change = req.PaymentMode == "Cash" ? Math.Max(0, req.AmountTendered - totalAmount) : 0;
 
