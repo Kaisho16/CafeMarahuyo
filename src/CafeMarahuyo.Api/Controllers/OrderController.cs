@@ -535,18 +535,29 @@ namespace CafeMarahuyo.Api.Controllers
                 .OrderBy(p => p.CategoryName).ThenBy(p => p.Name).ToListAsync();
                 
             var result = new List<ProductDto>();
+
+            // Fetch all required inventory items in a single batch query (Fixing N+1 problem)
+            var allInvIds = products.SelectMany(p => p.Ingredients ?? Enumerable.Empty<ProductIngredient>())
+                                    .Select(i => i.InventoryItemId)
+                                    .Distinct()
+                                    .ToList();
+            
+            var allInvItems = new Dictionary<int, CafeMarahuyo.Shared.Entities.InventoryItem>();
+            if (allInvIds.Any())
+            {
+                allInvItems = await _cafeContext.InventoryItems
+                                                .Where(i => allInvIds.Contains(i.Id))
+                                                .ToDictionaryAsync(i => i.Id, i => i);
+            }
+
             foreach(var p in products)
             {
                 var dto = new ProductDto { Id = p.Id, Name = p.Name, CategoryName = p.CategoryName, Price = p.Price, Description = p.Description, IsAvailable = p.IsAvailable };
                 if (p.Ingredients != null && p.Ingredients.Any())
                 {
-                    // Fetch inventory names
-                    var invIds = p.Ingredients.Select(i => i.InventoryItemId).ToList();
-                    var invItems = await _cafeContext.InventoryItems.Where(i => invIds.Contains(i.Id)).ToDictionaryAsync(i => i.Id, i => i);
-                    
                     foreach(var ing in p.Ingredients)
                     {
-                        if(invItems.TryGetValue(ing.InventoryItemId, out var invItem))
+                        if(allInvItems.TryGetValue(ing.InventoryItemId, out var invItem))
                         {
                             dto.Ingredients.Add(new ProductIngredientDto
                             {
