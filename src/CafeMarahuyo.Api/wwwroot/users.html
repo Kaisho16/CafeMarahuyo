@@ -188,6 +188,7 @@
                     displayName: document.getElementById('new-displayname').value.trim(),
                     password: password,
                     role: document.getElementById('new-role').value
+                };
 
                 try {
                     await apiFetch('/auth/register', {

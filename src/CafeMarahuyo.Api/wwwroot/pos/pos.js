@@ -369,8 +369,17 @@ function renderDiscountDropdown() {
     let html = `<option value="">No Discount</option>`;
     
     // Group active promos by category
-    const activePromos = promos.filter(p => p.isActive && (!p.validUntil || new Date(p.validUntil) >= new Date()) && (!p.validFrom || new Date(p.validFrom) <= new Date()));
-    
+    const now = new Date().getTime();
+    const activePromos = promos.filter(p => {
+        if (!p.isActive) return false;
+        
+        // Fix timezone issue: validUntil is 00:00:00 UTC of that day, so we add 24 hours (86400000 ms) so it expires at the end of the day
+        if (p.validUntil && (new Date(p.validUntil).getTime() + 86400000) <= now) return false;
+        
+        if (p.validFrom && new Date(p.validFrom).getTime() > now) return false;
+        
+        return true;
+    });
     const categories = [...new Set(activePromos.map(p => p.category || 'Promo Code'))];
     
     categories.forEach(cat => {
