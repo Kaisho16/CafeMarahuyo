@@ -110,6 +110,7 @@ namespace CafeMarahuyo.Api.Controllers
         }
 
         [HttpPost("register")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
         {
             if (string.IsNullOrEmpty(req.Username) || string.IsNullOrEmpty(req.Password) || string.IsNullOrEmpty(req.DisplayName))
@@ -120,15 +121,6 @@ namespace CafeMarahuyo.Api.Controllers
                 return BadRequest(new { error = "Role must be admin or staff" });
 
             var role = req.Role ?? "staff";
-
-            if (role == "admin")
-            {
-                var secretKey = _config["AdminSecretKey"];
-                if (string.IsNullOrEmpty(req.SecretKey) || req.SecretKey != secretKey)
-                {
-                    return Unauthorized(new { error = "Admin secret key is required to register an admin account." });
-                }
-            }
 
             var existing = await _context.Users.AnyAsync(u => u.Username == req.Username);
             if (existing)

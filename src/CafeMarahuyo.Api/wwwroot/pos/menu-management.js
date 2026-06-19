@@ -63,6 +63,7 @@ function switchTab(tabId, el) {
     if (tabId === 'addons') fetchAddons();
     if (tabId === 'settings') fetchSettings();
     if (tabId === 'audit') fetchAuditLogs();
+    if (tabId === 'discounts') fetchDiscounts();
 }
 
 // ========================== PRODUCTS ==========================

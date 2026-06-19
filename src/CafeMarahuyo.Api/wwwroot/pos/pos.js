@@ -3,6 +3,7 @@
 let products = [];
 let sizeModifiers = [];
 let addons = [];
+let promos = [];
 let posSettings = { taxRate: 0, receiptFooter: "" };
 let cart = [];
 let currentCategory = 'All';
@@ -91,21 +92,24 @@ async function fetchWithAuth(url, options = {}) {
 
 async function loadInitialData() {
     try {
-        const [prodRes, sizeRes, addRes, setRes] = await Promise.all([
+        const [prodRes, sizeRes, addRes, setRes, promoRes] = await Promise.all([
             fetchWithAuth('/api/orders/products'),
             fetchWithAuth('/api/orders/size-modifiers'),
             fetchWithAuth('/api/orders/addons'),
-            fetchWithAuth('/api/orders/settings')
+            fetchWithAuth('/api/orders/settings'),
+            fetchWithAuth('/api/promos')
         ]);
 
         if (prodRes.ok) products = await prodRes.json();
         if (sizeRes.ok) sizeModifiers = await sizeRes.json();
         if (addRes.ok) addons = await addRes.json();
         if (setRes.ok) posSettings = await setRes.json();
+        if (promoRes.ok) promos = await promoRes.json();
 
         document.getElementById('tax-rate-label').textContent = posSettings.taxRate;
         renderCategories();
         renderProducts();
+        renderDiscountDropdown();
     } catch (e) {
         console.error(e);
         showToast("Error loading POS data: " + e.message, true);
@@ -355,70 +359,50 @@ function updateCartQty(cartId, delta) {
     updateCart();
 }
 
-function toggleDiscountInput() {
-    const type = document.getElementById('discount-type').value;
-    const input = document.getElementById('discount-value');
-    if (type === '') {
-        input.style.display = 'none';
-        currentDiscountType = '';
-        currentDiscountValue = 0;
-        currentPromoCode = null;
-        updateCart();
-    } else {
-        input.style.display = 'block';
-        if (type === 'promo') input.placeholder = 'Promo Code';
-        else input.placeholder = 'Value';
-    }
+function renderDiscountDropdown() {
+    const select = document.getElementById('discount-type');
+    if (!select) return;
+
+    let html = `<option value="">No Discount</option>`;
+    
+    // Group active promos by category
+    const activePromos = promos.filter(p => p.isActive && (!p.validUntil || new Date(p.validUntil) >= new Date()) && (!p.validFrom || new Date(p.validFrom) <= new Date()));
+    
+    const categories = [...new Set(activePromos.map(p => p.category || 'Promo Code'))];
+    
+    categories.forEach(cat => {
+        html += `<optgroup label="${cat}">`;
+        const catPromos = activePromos.filter(p => (p.category || 'Promo Code') === cat);
+        catPromos.forEach(p => {
+            const valStr = p.discountType === 'percentage' ? `${p.value}%` : `₱${p.value}`;
+            html += `<option value="${p.id}">${p.code} (${valStr})</option>`;
+        });
+        html += `</optgroup>`;
+    });
+
+    select.innerHTML = html;
 }
 
-async function applyDiscount() {
-    const btn = document.querySelector('button[onclick="applyDiscount()"]');
-    if (btn && btn.disabled) return;
-    if (btn) btn.disabled = true;
+function applyDiscount() {
+    const select = document.getElementById('discount-type');
+    if (!select) return;
 
-    try {
-        const type = document.getElementById('discount-type').value;
-        const valStr = document.getElementById('discount-value').value;
-        
-        if (type === '') return;
-        
-        if (type === 'promo') {
-            try {
-                const res = await fetchWithAuth('/api/orders/validate-promo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ promoCode: valStr })
-                });
-                if (!res.ok) throw new Error("Invalid promo code");
-                
-                const promo = await res.json();
-                currentPromoCode = promo.code;
-                currentDiscountType = promo.discountType;
-                currentDiscountValue = promo.value;
-                showToast("Promo applied!");
-            } catch (e) {
-                showToast("Invalid promo code", true);
-                currentPromoCode = null;
-                currentDiscountType = '';
-                currentDiscountValue = 0;
-            }
-        } else {
-            currentDiscountType = type;
-            currentDiscountValue = parseFloat(valStr) || 0;
-            currentPromoCode = null;
-            if (currentDiscountValue > 0) {
-                showToast("Discount applied!");
-            }
+    const selectedId = select.value;
+    if (selectedId === '') {
+        currentPromoCode = null;
+        currentDiscountType = '';
+        currentDiscountValue = 0;
+        showToast("Discount removed");
+    } else {
+        const p = promos.find(x => x.id.toString() === selectedId);
+        if (p) {
+            currentPromoCode = p.code;
+            currentDiscountType = p.discountType;
+            currentDiscountValue = p.value;
+            showToast(`${p.category} applied!`);
         }
-        updateCart();
-        
-        // Reset the discount input fields for better UX
-        document.getElementById('discount-type').value = '';
-        document.getElementById('discount-value').value = '';
-        document.getElementById('discount-value').style.display = 'none';
-    } finally {
-        if (btn) btn.disabled = false;
     }
+    updateCart();
 }
 
 function addQuickCash(amt) {
@@ -513,8 +497,10 @@ function updateCart() {
     }
 
     const discountedSub = subtotal - discount;
-    const tax = discountedSub * (posSettings.taxRate / 100);
-    const grand = discountedSub + tax;
+    const grand = discountedSub;
+    const tax = posSettings.taxRate > 0 
+        ? discountedSub - (discountedSub / (1 + (posSettings.taxRate / 100))) 
+        : 0;
 
     document.getElementById('tax-amount').textContent = `₱${tax.toFixed(2)}`;
     document.getElementById('grand-total').textContent = `₱${grand.toFixed(2)}`;
@@ -537,6 +523,19 @@ async function checkout() {
 
     const isEWallet = currentPaymentMode === 'E-Wallet';
     const isManualReference = document.getElementById('reference-code') && document.getElementById('reference-code').value.trim() !== '';
+
+    if (isManualReference) {
+        const refValue = document.getElementById('reference-code').value.trim();
+        const refRegex = /^\d{9,16}$/;
+        if (!refRegex.test(refValue)) {
+            showToast('Reference code must be between 9 and 16 digits.', 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Checkout";
+            }
+            return;
+        }
+    }
 
     const req = {
         orderType: currentOrderType,

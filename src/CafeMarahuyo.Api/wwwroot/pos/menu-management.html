@@ -87,6 +87,7 @@
             <div class="tab active" onclick="switchTab('products', this)">Products</div>
             <div class="tab" onclick="switchTab('sizes', this)">Sizes</div>
             <div class="tab" onclick="switchTab('addons', this)">Add-ons</div>
+            <div class="tab" onclick="switchTab('discounts', this)">Discounts</div>
             <div class="tab" onclick="switchTab('settings', this)">Settings</div>
             <div class="tab" onclick="switchTab('audit', this)">Archives</div>
         </div>
@@ -126,6 +127,19 @@
                     <table class="admin-table">
                         <thead><tr><th>Category</th><th>Name</th><th>Price</th><th>Active</th><th>Actions</th></tr></thead>
                         <tbody id="addon-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DISCOUNTS TAB -->
+            <div class="tab-content" id="tab-discounts">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                    <button class="promo-btn" style="background: var(--accent); color: white;" onclick="openDiscountModal()">+ New Discount/Promo</button>
+                </div>
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead><tr><th>Category</th><th>Code/Name</th><th>Type</th><th>Value</th><th>Valid From</th><th>Valid Until</th><th>Active</th><th>Actions</th></tr></thead>
+                        <tbody id="discount-tbody"></tbody>
                     </table>
                 </div>
             </div>

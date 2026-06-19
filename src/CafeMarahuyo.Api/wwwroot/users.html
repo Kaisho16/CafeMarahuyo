@@ -133,11 +133,7 @@
                         <option value="admin">Admin</option>
                     </select>
                 </div>
-                <div class="form-group" id="admin-secret-group" style="display:none;">
-                    <label for="new-secretkey">Admin Secret Key</label>
-                    <input type="password" id="new-secretkey" class="form-input" placeholder="Required for Admins">
                 </div>
-            </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-close="user-modal">Cancel</button>
                 <button class="btn btn-primary" id="btn-save-user">
@@ -170,13 +166,7 @@
                 document.getElementById('new-password').value = '';
                 document.getElementById('new-confirm-password').value = '';
                 document.getElementById('new-role').value = 'staff';
-                document.getElementById('new-secretkey').value = '';
-                document.getElementById('admin-secret-group').style.display = 'none';
                 openModal('user-modal');
-            });
-
-            document.getElementById('new-role').addEventListener('change', (e) => {
-                document.getElementById('admin-secret-group').style.display = e.target.value === 'admin' ? 'block' : 'none';
             });
 
             document.getElementById('btn-save-user').addEventListener('click', async () => {
@@ -197,9 +187,7 @@
                     username: document.getElementById('new-username').value.trim(),
                     displayName: document.getElementById('new-displayname').value.trim(),
                     password: password,
-                    role: document.getElementById('new-role').value,
-                    secretKey: document.getElementById('new-secretkey').value
-                };
+                    role: document.getElementById('new-role').value
 
                 try {
                     await apiFetch('/auth/register', {

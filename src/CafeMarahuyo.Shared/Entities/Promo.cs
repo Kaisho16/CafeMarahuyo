@@ -27,6 +27,14 @@ namespace CafeMarahuyo.Shared.Entities
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [Required]
+        [MaxLength(50)]
+        [Column("category")] // e.g., "Promo Code", "PWD", "Student"
+        public string Category { get; set; } = "Promo Code";
+
+        [Column("valid_from")]
+        public DateTime? ValidFrom { get; set; }
+
         [Column("valid_until")]
         public DateTime? ValidUntil { get; set; }
 

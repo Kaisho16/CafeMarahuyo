@@ -102,14 +102,10 @@
             </div>
 
             <div class="discount-section" style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px; width: 100%;">
-                <select id="discount-type" class="promo-input" style="flex: 1;" onchange="toggleDiscountInput()">
+                <select id="discount-type" class="promo-input" style="flex: 1;" onchange="applyDiscount()">
                     <option value="">No Discount</option>
-                    <option value="percentage">% Discount</option>
-                    <option value="fixed">₱ Discount</option>
-                    <option value="promo">Promo Code</option>
                 </select>
-                <input type="text" id="discount-value" class="promo-input" style="display: none; flex: 1; min-width: 0;" placeholder="Value">
-                <button class="promo-btn" id="apply-discount-btn" onclick="applyDiscount()" style="flex-shrink: 0; margin-left: 0;">Apply</button>
+                <!-- Removed apply-discount-btn and text input to make it tap-only per requirement -->
             </div>
 
             <!-- Cash Tendering Section (Only visible when Cash is selected) -->
@@ -129,7 +125,7 @@
             <!-- E-Wallet Reference Section -->
             <div class="ewallet-reference-section" id="ewallet-reference-section" style="display: none; margin-bottom: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Reference Code (Optional)</span>
+                    <span style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">Reference Code (9-16 digits)</span>
                     <input type="text" id="reference-code" class="promo-input" style="width: 150px; text-align: right;" placeholder="e.g. 123456789">
                 </div>
                 <small class="text-muted" style="font-size: 0.75rem; display: block; line-height: 1.2;">
@@ -147,8 +143,8 @@
                     <span id="discount-amount">-₱0.00</span>
                 </div>
                 <div class="totals-row">
-                    <span>Tax (<span id="tax-rate-label">0</span>%)</span>
-                    <span id="tax-amount">₱0.00</span>
+                    <span>VAT Included (<span id="tax-rate-label">0</span>%)</span>
+                    <span id="tax-amount" class="text-muted" style="font-size: 0.85rem;">₱0.00</span>
                 </div>
                 <div class="totals-row grand-total">
                     <span>Total</span>
