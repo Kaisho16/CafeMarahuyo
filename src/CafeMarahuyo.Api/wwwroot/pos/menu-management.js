@@ -370,3 +370,135 @@ document.addEventListener('DOMContentLoaded', () => {
     initAuth();
     fetchProducts();
 });
+
+// ========================== DISCOUNTS ==========================
+
+let allDiscounts = [];
+
+async function fetchDiscounts() {
+    try {
+        const res = await fetchWithAuth('/api/promos');
+        if (res.ok) {
+            allDiscounts = await res.json();
+            renderDiscounts();
+        }
+    } catch (e) { console.error("Error fetching discounts", e); }
+}
+
+function renderDiscounts() {
+    const tbody = document.getElementById('discount-tbody');
+    if (!tbody) return;
+    
+    if (allDiscounts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No discounts configured yet.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = allDiscounts.map(d => `
+        <tr>
+            <td><span class="status-badge" style="background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border);">${d.category || 'Promo Code'}</span></td>
+            <td style="font-weight: 600;">${d.code}</td>
+            <td>${d.discountType === 'percentage' ? '%' : '₱'} Discount</td>
+            <td>${d.discountType === 'percentage' ? d.value + '%' : '₱' + d.value.toFixed(2)}</td>
+            <td>${d.validFrom ? new Date(d.validFrom).toLocaleDateString() : '-'}</td>
+            <td>${d.validUntil ? new Date(d.validUntil).toLocaleDateString() : '-'}</td>
+            <td>${d.isActive ? '<span class="status-badge active">Active</span>' : '<span class="status-badge inactive">Inactive</span>'}</td>
+            <td>
+                <button class="action-btn" onclick="openDiscountModal(${d.id})" title="Edit"><i class="material-icons-round">edit</i></button>
+                <button class="action-btn delete" onclick="deleteDiscount(${d.id})" title="Delete"><i class="material-icons-round">delete</i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function openDiscountModal(id = null) {
+    const d = id ? allDiscounts.find(x => x.id === id) : null;
+    document.getElementById('admin-modal-title').textContent = d ? 'Edit Discount/Promo' : 'New Discount/Promo';
+    
+    document.getElementById('admin-modal-body').innerHTML = `
+        <div class="form-group">
+            <label>Category (e.g. Promo Code, PWD, Student)</label>
+            <input type="text" id="m-disc-cat" class="form-input" value="${d ? (d.category||'') : 'Promo Code'}">
+        </div>
+        <div class="form-group">
+            <label>Code / Name</label>
+            <input type="text" id="m-disc-code" class="form-input" value="${d ? d.code : ''}">
+        </div>
+        <div style="display:flex; gap:16px;">
+            <div class="form-group" style="flex:1;">
+                <label>Discount Type</label>
+                <select id="m-disc-type" class="form-input">
+                    <option value="percentage" ${d && d.discountType==='percentage' ? 'selected':''}>Percentage (%)</option>
+                    <option value="fixed" ${d && d.discountType==='fixed' ? 'selected':''}>Fixed Amount (₱)</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Value</label>
+                <input type="number" id="m-disc-val" class="form-input" step="0.01" value="${d ? d.value : 0}">
+            </div>
+        </div>
+        <div style="display:flex; gap:16px;">
+            <div class="form-group" style="flex:1;">
+                <label>Valid From (Optional)</label>
+                <input type="date" id="m-disc-from" class="form-input" value="${d && d.validFrom ? d.validFrom.split('T')[0] : ''}">
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Valid Until (Optional)</label>
+                <input type="date" id="m-disc-until" class="form-input" value="${d && d.validUntil ? d.validUntil.split('T')[0] : ''}">
+            </div>
+        </div>
+        ${d ? `
+        <div class="form-group" style="flex-direction:row;align-items:center;margin-top:8px;">
+            <input type="checkbox" id="m-disc-avail" ${d.isActive ? 'checked' : ''} style="width:18px;height:18px;">
+            <label style="margin-left:8px;font-size:0.9rem;">Active</label>
+        </div>
+        ` : ''}
+    `;
+    
+    document.getElementById('admin-save-btn').onclick = () => saveDiscount(id);
+    document.getElementById('admin-modal-overlay').classList.add('open');
+    document.getElementById('admin-modal').classList.add('open');
+}
+
+async function saveDiscount(id) {
+    const saveBtn = document.getElementById('admin-save-btn');
+    if (saveBtn && saveBtn.disabled) return;
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = "Saving..."; }
+
+    try {
+        const fromDate = document.getElementById('m-disc-from').value;
+        const untilDate = document.getElementById('m-disc-until').value;
+        
+        const req = {
+            category: document.getElementById('m-disc-cat').value,
+            code: document.getElementById('m-disc-code').value,
+            discountType: document.getElementById('m-disc-type').value,
+            value: parseFloat(document.getElementById('m-disc-val').value) || 0,
+            validFrom: fromDate ? new Date(fromDate).toISOString() : null,
+            validUntil: untilDate ? new Date(untilDate).toISOString() : null,
+            isActive: id ? document.getElementById('m-disc-avail').checked : true
+        };
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? \`/api/promos/\${id}\` : '/api/promos';
+        const res = await fetchWithAuth(url, { method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(req)});
+        
+        if (res.ok) { showToast(id ? "Updated!" : "Created!"); closeAdminModal(); fetchDiscounts(); }
+        else { const err = await res.json(); throw new Error(err.error || 'Failed to save'); }
+    } catch (err) {
+        showToast(err.message, true);
+    } finally {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = "Save"; }
+    }
+}
+
+async function deleteDiscount(id) {
+    if(!confirm("Are you sure you want to delete this discount?")) return;
+    try {
+        const res = await fetchWithAuth(\`/api/promos/\${id}\`, { method: 'DELETE' });
+        if(res.ok) { showToast("Deleted!"); fetchDiscounts(); }
+        else throw new Error("Failed to delete");
+    } catch(e) {
+        showToast(e.message, true);
+    }
+}

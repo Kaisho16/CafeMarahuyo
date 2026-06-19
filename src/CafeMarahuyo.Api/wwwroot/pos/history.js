@@ -20,6 +20,9 @@ function initAuth() {
     if (isAdmin) {
         const menuMgt = document.getElementById('nav-menu-management');
         if (menuMgt) menuMgt.style.display = 'flex';
+        
+        const invNav = document.getElementById('nav-inventory');
+        if (invNav) invNav.style.display = 'flex';
     }
 }
 

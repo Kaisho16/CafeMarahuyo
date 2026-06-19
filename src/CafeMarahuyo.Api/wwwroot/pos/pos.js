@@ -45,6 +45,9 @@ function initAuth() {
     if (isAdmin) {
         const menuMgt = document.getElementById('nav-menu-management');
         if (menuMgt) menuMgt.style.display = 'flex';
+        
+        const invNav = document.getElementById('nav-inventory');
+        if (invNav) invNav.style.display = 'flex';
     }
 }
 
@@ -498,9 +501,7 @@ function updateCart() {
 
     const discountedSub = subtotal - discount;
     const grand = discountedSub;
-    const tax = posSettings.taxRate > 0 
-        ? discountedSub - (discountedSub / (1 + (posSettings.taxRate / 100))) 
-        : 0;
+    const tax = discountedSub * (posSettings.taxRate / 100);
 
     document.getElementById('tax-amount').textContent = `₱${tax.toFixed(2)}`;
     document.getElementById('grand-total').textContent = `₱${grand.toFixed(2)}`;
